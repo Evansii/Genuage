@@ -59,7 +59,7 @@ namespace DesktopInterface
         public Dictionary<int, GameObject> SphereButtonsDict;
         public Dictionary<int, GameObject> ConvexHullButtonsDict;
 
-        public void Awake()
+        public void Start()
         {
             ButtonDicts = new Dictionary<string, Dictionary<int, GameObject>>();
             CounterButtonsDict = new Dictionary<int, GameObject>();
