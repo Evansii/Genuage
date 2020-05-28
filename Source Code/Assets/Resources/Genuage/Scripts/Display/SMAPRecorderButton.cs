@@ -18,12 +18,18 @@ namespace DesktopInterface
 
         CloudData data;
 
+        SMAPAnimateCloud cloudAnim;
+
         GameObject camera;
 
         ScreenRecorder recorder;
 
         public Button recordButton;
+        public Button saveKeyButton;
+        public Button previewButton;
+
         public InputField recordTimeInputField;
+
         public Dropdown framerateDropdown;
 
         public int framerate = 30;
@@ -37,10 +43,18 @@ namespace DesktopInterface
 
         private void Awake()
         {
+            button = GetComponent<Button>();
+            initializeClickEvent();
+
             camera = GameObject.FindWithTag("MainCamera");
+            
             recorder = camera.GetComponent<ScreenRecorder>();
 
             recordButton.onClick.AddListener(Record);
+
+            previewButton.onClick.AddListener(PreviewAnimation);
+
+            saveKeyButton.onClick.AddListener(SaveKeyframe);
 
             recordTimeInputField.text = recordTime.ToString();
             recordTimeInputField.onEndEdit.AddListener(UpdateRecordTime);
@@ -54,12 +68,15 @@ namespace DesktopInterface
 
         public override void Execute()
         {
+            cloudAnim = GameObject.FindWithTag("PointCloud").GetComponent<SMAPAnimateCloud>();
+            Debug.Log(cloudAnim);
             data = CloudUpdater.instance.LoadCurrentStatus(); 
       
         }
 
         public void Record()
         {
+            cloudAnim.PlayAnimation();
             if(!isRecording)
             {
                 isRecording = true;
@@ -116,6 +133,18 @@ namespace DesktopInterface
             recorder.maxFrames = nb_frames;
 
         }
+
+
+        public void PreviewAnimation()
+        {
+            cloudAnim.PlayAnimation();
+        }
+
+        public void SaveKeyframe()
+        { 
+            cloudAnim.AddKeyframe();
+        }
+
 
 
 

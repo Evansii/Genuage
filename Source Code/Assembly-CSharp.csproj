@@ -142,6 +142,7 @@
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\CloudLoader.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\CloudSaveableData.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\CloudSaver.cs" />
+     <Compile Include="Assets\Resources\Genuage\Scripts\IO\SMAPAnimateCloud.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\ZMQ_TCP_communication\ScreenRecorder.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\ZMQ_TCP_communication\SMAPCommunicator.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\IO\ZMQ_TCP_communication\TCPIPCommunicator.cs" />

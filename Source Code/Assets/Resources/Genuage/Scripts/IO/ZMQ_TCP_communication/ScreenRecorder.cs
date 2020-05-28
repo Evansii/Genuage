@@ -256,7 +256,7 @@ public class ScreenRecorder : MonoBehaviour
 		};
 
 		proc.Start();
-		proc.WaitForExit(1000);
+		proc.WaitForExit(3000);
 
 		string[] tmpframes = Directory.GetFiles(persistentDataPath, "*.bmp");
 		foreach (string frame in tmpframes)
