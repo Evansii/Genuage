@@ -64,6 +64,8 @@ public class ScreenRecorder : MonoBehaviour
 	public int maxFrames; // maximum number of frames you want to record in one video
 	public int frameRate = 30; // number of frames to capture per second
 
+	public string outputname;
+
 	// The Encoder Thread
 	private Thread encoderThread;
 
@@ -242,12 +244,14 @@ public class ScreenRecorder : MonoBehaviour
 
 		print ("SCREENRECORDER IO THREAD FINISHED");
 
+		string commandline = "-i frame%d.bmp "+outputname+".mp4";
+
 		var proc = new Process
 		{
 			StartInfo = new ProcessStartInfo
 			{
 				FileName =  ffmpath,
-				Arguments = "-i frame%d.bmp output.avi",
+				Arguments = commandline,
 				UseShellExecute = true,
 				RedirectStandardOutput = false,
 				CreateNoWindow = false,

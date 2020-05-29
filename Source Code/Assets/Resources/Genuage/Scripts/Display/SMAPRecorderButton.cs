@@ -1,4 +1,11 @@
-﻿using System;
+﻿/**
+Vincent Casamayou
+RIES GROUP
+SMAP Recorder UI
+27/05/2020
+**/
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +20,7 @@ namespace DesktopInterface
 
     public class SMAPRecorderButton : IButtonScript
     {
+        public bool isAnimated = false;
 
         public bool isRecording = false;
 
@@ -29,11 +37,15 @@ namespace DesktopInterface
         public Button previewButton;
 
         public InputField recordTimeInputField;
+        public InputField nameInputField;
 
         public Dropdown framerateDropdown;
+        public Dropdown animSpeedDropdown;
 
-        public int framerate = 30;
-        public int recordTime = 10;
+        
+
+        public float framerate = 30;
+        public float recordTime = 10;
         public int nb_frames = 300;
 
 
@@ -59,7 +71,12 @@ namespace DesktopInterface
             recordTimeInputField.text = recordTime.ToString();
             recordTimeInputField.onEndEdit.AddListener(UpdateRecordTime);
 
+            nameInputField.text = "Outputname";
+            nameInputField.onEndEdit.AddListener(UpdateRecordName);
+
             framerateDropdown.onValueChanged.AddListener(UpdateFrameRate);
+
+            animSpeedDropdown.onValueChanged.AddListener(UpdateAnimationSpeed);
 
 
         }
@@ -76,7 +93,14 @@ namespace DesktopInterface
 
         public void Record()
         {
-            cloudAnim.PlayAnimation();
+
+            if(isAnimated)
+            {
+                recordTime = cloudAnim.animationTime + 1f;
+                UpdateFrameNumber();
+                cloudAnim.PlayAnimation();
+            }
+
             if(!isRecording)
             {
                 isRecording = true;
@@ -97,7 +121,7 @@ namespace DesktopInterface
             if (Single.TryParse(framerateDropdown.options[id].text, out float j))
             {
                 recorder.frameRate = Convert.ToInt32(j);
-                framerate = Convert.ToInt32(j);
+                framerate = j;
                 UpdateFrameNumber();
             }
             else
@@ -113,7 +137,7 @@ namespace DesktopInterface
             {
                 if (j >= 0)
                 {
-                    recordTime = j;
+                    recordTime = (float)j;
                     UpdateFrameNumber();
                 }
             }
@@ -127,12 +151,29 @@ namespace DesktopInterface
 
         }
 
+        public void UpdateRecordName(string s)
+        {
+            recorder.outputname = s;
+        }
+
+
         public void UpdateFrameNumber()
         {
-            nb_frames = recordTime* framerate;
+            nb_frames = Convert.ToInt32(recordTime* framerate);
             recorder.maxFrames = nb_frames;
 
         }
+
+        public void UpdateAnimationSpeed(int id)
+        {
+            if (Single.TryParse(animSpeedDropdown.options[id].text, out float speed))
+            {
+                cloudAnim.SetAnimationSpeed(speed);
+            }
+            else
+                Debug.Log("Animation Speed could not be parsed");
+        }
+
 
 
         public void PreviewAnimation()
@@ -143,6 +184,8 @@ namespace DesktopInterface
         public void SaveKeyframe()
         { 
             cloudAnim.AddKeyframe();
+            if(!isAnimated)
+                isAnimated = true;
         }
 
 

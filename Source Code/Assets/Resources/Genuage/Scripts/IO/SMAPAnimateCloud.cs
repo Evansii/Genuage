@@ -6,17 +6,27 @@ public class SMAPAnimateCloud : MonoBehaviour
 {
     public float indexkey = 0.0f;
 
-    public float animationSpeed =2.5f;
+    public float keyframeTimestep = 5.0f;
+
+    public float timestep = 5f;
+
+    public float animationTime;
 
     Animation anim;
 
-    [System.NonSerialized]
-    public Keyframe keysRotationW;
-    public Keyframe keysRotationX;
-    public Keyframe keysRotationY;
-    public Keyframe keysRotationZ;
+    public Keyframe keyRotationW = new Keyframe();
+    public Keyframe keyRotationX = new Keyframe();
+    public Keyframe keyRotationY = new Keyframe();
+    public Keyframe keyRotationZ = new Keyframe();
 
-    [System.NonSerialized] 
+    public Keyframe keyScaleX = new Keyframe();
+    public Keyframe keyScaleY = new Keyframe();
+    public Keyframe keyScaleZ = new Keyframe();
+
+    public Keyframe keyPositionX = new Keyframe();
+    public Keyframe keyPositionY = new Keyframe();
+    public Keyframe keyPositionZ = new Keyframe();
+
     public AnimationClip clip;
 
     AnimationCurve curveRotationW;
@@ -24,62 +34,79 @@ public class SMAPAnimateCloud : MonoBehaviour
     AnimationCurve curveRotationY;
     AnimationCurve curveRotationZ;
 
+    AnimationCurve curveScaleX;
+    AnimationCurve curveScaleY;
+    AnimationCurve curveScaleZ;
 
-
-    public float[] initialRot;
-
-    public List<float[]> SavedRot;
+    AnimationCurve curvePositionX;
+    AnimationCurve curvePositionY;
+    AnimationCurve curvePositionZ;
 
     void Start()    
     {
         anim = gameObject.AddComponent(typeof(Animation)) as Animation;
 
         clip = new AnimationClip();
-        clip.legacy =true;
+        clip.legacy = true;
 
-        keysRotationW = new Keyframe();
-        keysRotationX = new Keyframe();
-        keysRotationY = new Keyframe();
-        keysRotationZ = new Keyframe();
+        curveRotationW = new AnimationCurve(keyRotationW);
+        curveRotationX = new AnimationCurve(keyRotationX);
+        curveRotationY = new AnimationCurve(keyRotationY);
+        curveRotationZ = new AnimationCurve(keyRotationZ);
+
+        curveScaleX = new AnimationCurve(keyScaleX);
+        curveScaleY = new AnimationCurve(keyScaleY);
+        curveScaleZ = new AnimationCurve(keyScaleZ);
+
+        curvePositionX = new AnimationCurve(keyPositionX);
+        curvePositionY = new AnimationCurve(keyPositionY);
+        curvePositionZ = new AnimationCurve(keyPositionZ);
         
-        //InitializeAnimation();
-
-        curveRotationW = new AnimationCurve(keysRotationW);
-        curveRotationX = new AnimationCurve(keysRotationX);
-        curveRotationY = new AnimationCurve(keysRotationY);
-        curveRotationZ = new AnimationCurve(keysRotationZ);
-
-        //UpdateAnimation();
-
-        //initialRot = new float[4]; 
+        //UpdateAnimation(); 
         
     }
 
-    public void InitializeAnimation()
-    {
-        keysRotationW.value = transform.localRotation.w;
-        keysRotationW.time = 0f;
-        keysRotationX.value = transform.localRotation.x;
-        keysRotationX.time = 0f;
-        keysRotationY.value = transform.localRotation.y;
-        keysRotationY.time = 0f;
-        keysRotationZ.value = transform.localRotation.w;
-        keysRotationZ.time = 0f;   
-    }
+    // public void InitializeAnimation()
+    // {
+    //     keysRotationW.value = transform.localRotation.w;
+    //     keysRotationW.time = 0f;
+    //     keysRotationX.value = transform.localRotation.x;
+    //     keysRotationX.time = 0f;
+    //     keysRotationY.value = transform.localRotation.y;
+    //     keysRotationY.time = 0f;
+    //     keysRotationZ.value = transform.localRotation.w;
+    //     keysRotationZ.time = 0f;   
+
+
+
+    // }
 
     
     public void AddKeyframe()
     {
-    
-        curveRotationW.AddKey(animationSpeed*indexkey, transform.localRotation.w);
-        curveRotationX.AddKey(animationSpeed*indexkey, transform.localRotation.x);
-        curveRotationY.AddKey(animationSpeed*indexkey, transform.localRotation.y);
-        curveRotationZ.AddKey(animationSpeed*indexkey, transform.localRotation.z);
-
-        UpdateAnimation(); 
 
         indexkey ++;
+        
+        animationTime = keyframeTimestep*indexkey;
+    
+        
+        curveRotationW.AddKey(animationTime, transform.localRotation.w);
+        curveRotationX.AddKey(animationTime, transform.localRotation.x);
+        curveRotationY.AddKey(animationTime, transform.localRotation.y);
+        curveRotationZ.AddKey(animationTime, transform.localRotation.z);
+ 
+        // curveScaleX.AddKey(animationTime, transform.localScale.x);
+        // curveScaleY.AddKey(animationTime, transform.localScale.y);
+        // curveScaleZ.AddKey(animationTime, transform.localScale.z);
 
+        curvePositionX.AddKey(animationTime, transform.localPosition.x);
+        curvePositionY.AddKey(animationTime, transform.localPosition.y);
+        curvePositionZ.AddKey(animationTime, transform.localPosition.z);
+
+        Debug.Log(transform.localScale.x);
+
+        UpdateAnimation(); 
+    
     }
 
     public void UpdateAnimation()
@@ -88,6 +115,14 @@ public class SMAPAnimateCloud : MonoBehaviour
         clip.SetCurve("",typeof(Transform),"localRotation.x",curveRotationX);
         clip.SetCurve("",typeof(Transform),"localRotation.y",curveRotationY);
         clip.SetCurve("",typeof(Transform),"localRotation.z",curveRotationZ);
+
+        // clip.SetCurve("",typeof(Transform),"localScale.x",curveScaleX);
+        // clip.SetCurve("",typeof(Transform),"localScale.y",curveScaleY);
+        // clip.SetCurve("",typeof(Transform),"localScale.z",curveScaleZ);
+
+        clip.SetCurve("",typeof(Transform),"localPosition.x",curvePositionX);
+        clip.SetCurve("",typeof(Transform),"localPosition.y",curvePositionY);
+        clip.SetCurve("",typeof(Transform),"localPosition.z",curvePositionZ);
 
         anim.AddClip(clip,clip.name);
         anim.clip = clip;   
@@ -109,4 +144,11 @@ public class SMAPAnimateCloud : MonoBehaviour
             anim.Stop();
         }
     }
+
+    public void SetAnimationSpeed(float animSpeed)
+    {
+        keyframeTimestep = timestep / animSpeed;
+        Debug.Log("Timestep is "+ keyframeTimestep);
+    }
+
 }
