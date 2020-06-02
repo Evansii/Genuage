@@ -24,6 +24,8 @@ namespace DesktopInterface
 
         public bool isRecording = false;
 
+        public GameObject box;
+
         CloudData data;
 
         SMAPAnimateCloud cloudAnim;
@@ -35,18 +37,27 @@ namespace DesktopInterface
         public Button recordButton;
         public Button saveKeyButton;
         public Button previewButton;
+        public Button deleteAnimButton;
+
+        public Button deleteKeyButton;
+        public Button rankUpButton;
+        public Button rankDownButton;
 
         public InputField recordTimeInputField;
         public InputField nameInputField;
 
         public Dropdown framerateDropdown;
         public Dropdown animSpeedDropdown;
+        public Dropdown keyframeManagerDropdown;
 
         
 
         public float framerate = 30;
         public float recordTime = 10;
         public int nb_frames = 300;
+
+        public List<string> keyframeList;
+        public int keyframeCount;
 
 
 
@@ -55,7 +66,10 @@ namespace DesktopInterface
 
         private void Awake()
         {
+            keyframeList = new List<string>();
+
             button = GetComponent<Button>();
+
             initializeClickEvent();
 
             camera = GameObject.FindWithTag("MainCamera");
@@ -68,15 +82,21 @@ namespace DesktopInterface
 
             saveKeyButton.onClick.AddListener(SaveKeyframe);
 
+            deleteAnimButton.onClick.AddListener(DeleteAnimation);
+
             recordTimeInputField.text = recordTime.ToString();
             recordTimeInputField.onEndEdit.AddListener(UpdateRecordTime);
 
-            nameInputField.text = "Outputname";
+            nameInputField.text = "Output_name";
             nameInputField.onEndEdit.AddListener(UpdateRecordName);
 
             framerateDropdown.onValueChanged.AddListener(UpdateFrameRate);
 
             animSpeedDropdown.onValueChanged.AddListener(UpdateAnimationSpeed);
+
+            
+            //Keyframe Manager
+
 
 
         }
@@ -88,12 +108,14 @@ namespace DesktopInterface
             cloudAnim = GameObject.FindWithTag("PointCloud").GetComponent<SMAPAnimateCloud>();
             Debug.Log(cloudAnim);
             data = CloudUpdater.instance.LoadCurrentStatus(); 
+            box = GameObject.Find("Box");
+            box.SetActive(true);
       
         }
 
         public void Record()
         {
-
+            HideBox();
             if(isAnimated)
             {
                 recordTime = cloudAnim.animationTime + 1f;
@@ -115,6 +137,13 @@ namespace DesktopInterface
             }
 
         }
+
+
+        public void HideBox()
+        {
+            box.SetActive(false);
+        }
+    
 
         public void UpdateFrameRate(int id)
         {
@@ -181,14 +210,33 @@ namespace DesktopInterface
             cloudAnim.PlayAnimation();
         }
 
-        public void SaveKeyframe()
-        { 
-            cloudAnim.AddKeyframe();
-            if(!isAnimated)
-                isAnimated = true;
+
+        public void DeleteAnimation()
+        {
+            cloudAnim.RemoveAnimation();
+            isAnimated = false;
         }
 
 
+        public void UpdateKeyframeManager()
+        {
+            keyframeManagerDropdown.ClearOptions();
+            keyframeManagerDropdown.AddOptions(keyframeList);
+
+        }
+
+        public void SaveKeyframe()
+        { 
+            keyframeCount++;
+            keyframeList.Add(keyframeCount.ToString());
+
+            cloudAnim.AddKeyframe();
+            if(!isAnimated)
+                isAnimated = true;
+
+            UpdateKeyframeManager();
+
+        }
 
 
 

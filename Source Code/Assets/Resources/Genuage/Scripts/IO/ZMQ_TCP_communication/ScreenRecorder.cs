@@ -243,7 +243,6 @@ public class ScreenRecorder : MonoBehaviour
 		threadIsProcessing = false;
 
 		print ("SCREENRECORDER IO THREAD FINISHED");
-
 		string commandline = "-i frame%d.bmp "+outputname+".mp4";
 
 		var proc = new Process
@@ -260,7 +259,7 @@ public class ScreenRecorder : MonoBehaviour
 		};
 
 		proc.Start();
-		proc.WaitForExit(3000);
+		proc.WaitForExit(10000);
 
 		string[] tmpframes = Directory.GetFiles(persistentDataPath, "*.bmp");
 		foreach (string frame in tmpframes)

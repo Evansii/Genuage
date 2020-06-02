@@ -103,7 +103,7 @@ public class SMAPAnimateCloud : MonoBehaviour
         curvePositionY.AddKey(animationTime, transform.localPosition.y);
         curvePositionZ.AddKey(animationTime, transform.localPosition.z);
 
-        Debug.Log(transform.localScale.x);
+        //Debug.Log(transform.localScale.x);
 
         UpdateAnimation(); 
     
@@ -149,6 +149,31 @@ public class SMAPAnimateCloud : MonoBehaviour
     {
         keyframeTimestep = timestep / animSpeed;
         Debug.Log("Timestep is "+ keyframeTimestep);
+    }
+
+    public void RemoveAnimation()
+    {
+        for(int i = 0; i < curvePositionX.keys.Length ; i++)
+        {
+            curveRotationW.RemoveKey(i);
+            curveRotationX.RemoveKey(i);
+            curveRotationY.RemoveKey(i);
+            curveRotationZ.RemoveKey(i);
+            
+            // curveScaleX.RemoveKey(i);
+            // curveScaleY.RemoveKey(i);
+            // curveScaleZ.RemoveKey(i);
+            
+            curvePositionX.RemoveKey(i);
+            curvePositionY.RemoveKey(i);
+            curvePositionZ.RemoveKey(i);
+        }
+
+        anim.RemoveClip(clip);
+        
+        indexkey = 0;
+
+        UpdateAnimation();
     }
 
 }
