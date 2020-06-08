@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -66,6 +67,9 @@ public class ScreenRecorder : MonoBehaviour
 
 	public string outputname;
 
+	public Text updateText;
+	public MeshRenderer box;
+
 	// The Encoder Thread
 	private Thread encoderThread;
 
@@ -90,6 +94,10 @@ public class ScreenRecorder : MonoBehaviour
 	
 	void OnEnable() 
 	{
+		updateText = GameObject.Find("Update Text").GetComponent<Text>();
+		box = GameObject.Find("Box").GetComponent<MeshRenderer>();
+
+		
 		// Set target frame rate (optional)
 		Application.targetFrameRate = frameRate;
 
@@ -129,7 +137,8 @@ public class ScreenRecorder : MonoBehaviour
 		// Start a new encoder thread
 		threadIsProcessing = true;
 		encoderThread = new Thread (EncodeAndSave);
-		encoderThread.Start ();
+		encoderThread.Start();
+		//updateText.text = "Movie Ready";
 	}
 	
 	void OnDisable() 
@@ -194,6 +203,9 @@ public class ScreenRecorder : MonoBehaviour
 		}
 		else //keep making screenshots until it reaches the max frame amount
 		{
+
+			updateText.text = "Processing Record...";
+			box.enabled= true;
 			// Inform thread to terminate when finished processing frames
 			terminateThreadWhenDone = true;
 
@@ -205,13 +217,12 @@ public class ScreenRecorder : MonoBehaviour
 		Graphics.Blit (source, destination);
 	}
 	
-	private void EncodeAndSave()
+	public void EncodeAndSave()
 	{
 		print ("SCREENRECORDER IO THREAD STARTED");
 
 		while (threadIsProcessing) 
 		{
-			print(frameQueue.Count);
 			if(frameQueue.Count > 0)
 			{
 				// Generate file path
@@ -239,6 +250,7 @@ public class ScreenRecorder : MonoBehaviour
 			}
 		}
 
+
 		terminateThreadWhenDone = false;
 		threadIsProcessing = false;
 
@@ -259,7 +271,7 @@ public class ScreenRecorder : MonoBehaviour
 		};
 
 		proc.Start();
-		proc.WaitForExit(10000);
+		proc.WaitForExit(100000);
 
 		string[] tmpframes = Directory.GetFiles(persistentDataPath, "*.bmp");
 		foreach (string frame in tmpframes)

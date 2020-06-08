@@ -1,4 +1,12 @@
-﻿using System.Collections;
+﻿/**
+Vincent Casamayou
+RIES GROUP
+SMAP Animation System
+29/05/2020
+**/
+
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -109,6 +117,39 @@ public class SMAPAnimateCloud : MonoBehaviour
     
     }
 
+    public void UpdateKeyframe(int index)
+    {
+        animationTime = keyframeTimestep * (float)index;
+
+        Keyframe TMPkeyRotationW = new Keyframe(animationTime, transform.localRotation.w);
+        curveRotationW.MoveKey(index, TMPkeyRotationW);
+        Keyframe TMPkeyRotationX = new Keyframe(animationTime, transform.localRotation.x);
+        curveRotationX.MoveKey(index, TMPkeyRotationX);
+        Keyframe TMPkeyRotationY = new Keyframe(animationTime, transform.localRotation.y);
+        curveRotationY.MoveKey(index, TMPkeyRotationY);
+        Keyframe TMPkeyRotationZ = new Keyframe(animationTime, transform.localRotation.z);
+        curveRotationZ.MoveKey(index, TMPkeyRotationZ);
+
+        // Keyframe TMPkeyScaleX = new Keyframe(animationTime,transform.localScale.x);
+        // curveScaleX.MoveKey(index, TMPkeyScaleX);
+        // Keyframe TMPkeyScaleY = new Keyframe(animationTime,transform.localScale.y);
+        // curveScaleY.MoveKey(index, TMPkeyScaleY);
+        // Keyframe TMPkeyScaleZ = new Keyframe(animationTime,transform.localScale.z);
+        // curveScalez.MoveKey(index, TMPkeyScaleZ);
+
+        Keyframe TMPkeyPositionX = new Keyframe(animationTime, transform.localPosition.x);
+        curvePositionX.MoveKey(index, TMPkeyPositionX);
+        Keyframe TMPkeyPositionY = new Keyframe(animationTime, transform.localPosition.y);
+        curvePositionY.MoveKey(index, TMPkeyPositionY);
+        Keyframe TMPkeyPositionZ = new Keyframe(animationTime, transform.localPosition.z);
+        curvePositionZ.MoveKey(index, TMPkeyPositionZ);
+
+        UpdateAnimation();
+
+    }
+
+
+
     public void UpdateAnimation()
     {
         clip.SetCurve("",typeof(Transform),"localRotation.w",curveRotationW);
@@ -153,7 +194,7 @@ public class SMAPAnimateCloud : MonoBehaviour
 
     public void RemoveAnimation()
     {
-        for(int i = 0; i < curvePositionX.keys.Length ; i++)
+        for(int i = 0; i < curvePositionX.length ; i++)
         {
             curveRotationW.RemoveKey(i);
             curveRotationX.RemoveKey(i);
@@ -169,11 +210,12 @@ public class SMAPAnimateCloud : MonoBehaviour
             curvePositionZ.RemoveKey(i);
         }
 
-        anim.RemoveClip(clip);
         
         indexkey = 0;
 
         UpdateAnimation();
+
+        anim.RemoveClip(clip);
     }
 
 }

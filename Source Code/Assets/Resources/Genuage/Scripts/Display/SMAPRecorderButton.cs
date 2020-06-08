@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using Data;
 using Display;
 using IO;
+using VRTK;
 
 
 namespace DesktopInterface
@@ -24,13 +25,20 @@ namespace DesktopInterface
 
         public bool isRecording = false;
 
-        public GameObject box;
+        public bool hiddenShadows = false;
+
+        public MeshRenderer box;
 
         CloudData data;
 
         SMAPAnimateCloud cloudAnim;
 
         GameObject camera;
+
+        GameObject cloudpoint;
+
+        GameObject cloudpointShadow;
+        public Texture shadowTex;
 
         ScreenRecorder recorder;
 
@@ -40,6 +48,7 @@ namespace DesktopInterface
         public Button deleteAnimButton;
 
         public Button deleteKeyButton;
+        public Button updateKeyButton;
         public Button rankUpButton;
         public Button rankDownButton;
 
@@ -50,7 +59,9 @@ namespace DesktopInterface
         public Dropdown animSpeedDropdown;
         public Dropdown keyframeManagerDropdown;
 
-        
+        public Toggle hideShadowToggle;
+
+        public Text updateText;
 
         public float framerate = 30;
         public float recordTime = 10;
@@ -59,6 +70,7 @@ namespace DesktopInterface
         public List<string> keyframeList;
         public int keyframeCount;
 
+        public List<GameObject> shadowsList = new List<GameObject>();
 
 
 
@@ -94,8 +106,13 @@ namespace DesktopInterface
 
             animSpeedDropdown.onValueChanged.AddListener(UpdateAnimationSpeed);
 
-            
+
             //Keyframe Manager
+            updateKeyButton.onClick.AddListener(UpdateKeyframe);
+
+            keyframeManagerDropdown.onValueChanged.AddListener(HideKeyframeShadows);
+
+            hideShadowToggle.onValueChanged.AddListener(UpdateHidddenShadows);
 
 
 
@@ -105,11 +122,11 @@ namespace DesktopInterface
 
         public override void Execute()
         {
-            cloudAnim = GameObject.FindWithTag("PointCloud").GetComponent<SMAPAnimateCloud>();
-            Debug.Log(cloudAnim);
+            cloudpoint = GameObject.FindWithTag("PointCloud");
+            cloudAnim = cloudpoint.GetComponent<SMAPAnimateCloud>();
             data = CloudUpdater.instance.LoadCurrentStatus(); 
-            box = GameObject.Find("Box");
-            box.SetActive(true);
+            box = GameObject.Find("Box").GetComponent<MeshRenderer>();
+            box.enabled = true;
       
         }
 
@@ -127,6 +144,7 @@ namespace DesktopInterface
             {
                 isRecording = true;
                 Debug.Log("Record ON");
+                updateText.text = "Recording...";
                 recorder.enabled = true;
             }
             else
@@ -141,7 +159,69 @@ namespace DesktopInterface
 
         public void HideBox()
         {
-            box.SetActive(false);
+            box.enabled = false;
+        }
+
+        public void CreateKeyframeShadow()
+        {
+            cloudpointShadow = GameObject.Instantiate(cloudpoint);
+            cloudpointShadow.name ="Keyframe Shadow " + keyframeManagerDropdown.options.Count;
+            cloudpointShadow.tag = "Shadow";
+            cloudpointShadow.GetComponent<MeshRenderer>().material.SetTexture("_ColorTex", shadowTex);
+            Destroy(cloudpointShadow.GetComponent<CloudData>());
+            Destroy(cloudpointShadow.GetComponent<CloudBox>());
+            Destroy(cloudpointShadow.GetComponent<SMAPAnimateCloud>());
+            Destroy(cloudpointShadow.GetComponent<VRTK_InteractableObject>());
+            //Destroy(cloudpointShadow.GetComponent<VRTK_ChildOfControllerGrabAttach>());
+            Destroy(cloudpointShadow.GetComponent<VRTK_RigidbodyFollow>());
+            Destroy(cloudpointShadow.GetComponent<Rigidbody>());
+            Destroy(cloudpointShadow.GetComponent<Animation>());
+
+            shadowsList.Add(cloudpointShadow);
+            
+            if(hiddenShadows)
+            {
+                cloudpointShadow.SetActive(false);
+            }           
+        }
+
+        public void HideKeyframeShadows(int id)
+        {
+            //GameObject[] shadows = GameObject.FindGameObjectsWithTag("Shadow");
+            Debug.Log("Keyframe Shadow "+ (keyframeManagerDropdown.value+1));
+            foreach(GameObject shad in shadowsList)
+            {
+                if(hiddenShadows)
+                {
+                    shad.SetActive(false);
+                }
+                else
+                {
+                    if(shad.name != "Keyframe Shadow "+ (keyframeManagerDropdown.value+1))
+                    {
+                        //shad.GetComponent<MeshRenderer>().enabled = false;
+                        shad.SetActive(false);
+
+                    }
+                    else
+                    {
+                        shad.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        public void UpdateHidddenShadows(bool select)
+        {
+            if(hideShadowToggle.isOn)
+            {
+                hiddenShadows = true;
+            }
+            else
+            {
+                hiddenShadows = false;
+            }
+            HideKeyframeShadows(0);
         }
     
 
@@ -176,8 +256,6 @@ namespace DesktopInterface
                 recordTimeInputField.text = recordTime.ToString();
             }
 
-
-
         }
 
         public void UpdateRecordName(string s)
@@ -203,6 +281,11 @@ namespace DesktopInterface
                 Debug.Log("Animation Speed could not be parsed");
         }
 
+        public void UpdateKeyframe()
+        {
+            cloudAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
+        }
+
 
 
         public void PreviewAnimation()
@@ -215,6 +298,11 @@ namespace DesktopInterface
         {
             cloudAnim.RemoveAnimation();
             isAnimated = false;
+            updateText.text = "No Animation detected";
+            keyframeList.Clear();
+            UpdateKeyframeManager();
+            keyframeCount = 0;
+
         }
 
 
@@ -222,6 +310,7 @@ namespace DesktopInterface
         {
             keyframeManagerDropdown.ClearOptions();
             keyframeManagerDropdown.AddOptions(keyframeList);
+            keyframeManagerDropdown.value = keyframeManagerDropdown.options.Count-1;
 
         }
 
@@ -230,12 +319,16 @@ namespace DesktopInterface
             keyframeCount++;
             keyframeList.Add(keyframeCount.ToString());
 
+
+            updateText.text = "Animation ready";
+
             cloudAnim.AddKeyframe();
             if(!isAnimated)
                 isAnimated = true;
 
             UpdateKeyframeManager();
 
+            CreateKeyframeShadow();
         }
 
 

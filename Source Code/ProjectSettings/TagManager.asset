@@ -9,6 +9,7 @@ TagManager:
   - projectile
   - FxTemporaire
   - PointCloud
+  - Shadow
   layers:
   - Default
   - TransparentFX
