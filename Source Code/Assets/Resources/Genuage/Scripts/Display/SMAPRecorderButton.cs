@@ -72,6 +72,8 @@ namespace DesktopInterface
 
         public List<GameObject> shadowsList = new List<GameObject>();
 
+        public string previousColorMap;
+
 
 
 
@@ -112,7 +114,7 @@ namespace DesktopInterface
 
             keyframeManagerDropdown.onValueChanged.AddListener(HideKeyframeShadows);
 
-            hideShadowToggle.onValueChanged.AddListener(UpdateHidddenShadows);
+            hideShadowToggle.onValueChanged.AddListener(UpdateHiddenShadows);
 
 
 
@@ -185,6 +187,7 @@ namespace DesktopInterface
             }           
         }
 
+
         public void HideKeyframeShadows(int id)
         {
             //GameObject[] shadows = GameObject.FindGameObjectsWithTag("Shadow");
@@ -211,7 +214,7 @@ namespace DesktopInterface
             }
         }
 
-        public void UpdateHidddenShadows(bool select)
+        public void UpdateHiddenShadows(bool select)
         {
             if(hideShadowToggle.isOn)
             {
@@ -222,6 +225,14 @@ namespace DesktopInterface
                 hiddenShadows = false;
             }
             HideKeyframeShadows(0);
+        }
+
+        public void UpdateShadowPosition()
+        {
+            GameObject currentShadow = GameObject.Find("Keyframe Shadow "+ (keyframeManagerDropdown.value+1));
+            currentShadow.transform.localPosition = cloudpoint.transform.localPosition;
+            currentShadow.transform.localEulerAngles = cloudpoint.transform.localEulerAngles;
+            currentShadow.transform.localScale = cloudpoint.transform.localScale;
         }
     
 
@@ -284,6 +295,8 @@ namespace DesktopInterface
         public void UpdateKeyframe()
         {
             cloudAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
+            UpdateShadowPosition();
+
         }
 
 
@@ -316,19 +329,41 @@ namespace DesktopInterface
 
         public void SaveKeyframe()
         { 
-            keyframeCount++;
-            keyframeList.Add(keyframeCount.ToString());
 
+            string currentColorMap = cloudpoint.GetComponent<CloudData>().globalMetaData.colormapName;
 
-            updateText.text = "Animation ready";
-
+            Debug.Log(currentColorMap); 
+            
             cloudAnim.AddKeyframe();
             if(!isAnimated)
                 isAnimated = true;
 
+            if(currentColorMap != previousColorMap)
+            {
+                cloudAnim.AddAnimationEvent("ColorMap", currentColorMap);
+            }
+
+            keyframeCount++;
+            keyframeList.Add(keyframeCount.ToString());
             UpdateKeyframeManager();
 
             CreateKeyframeShadow();
+
+            previousColorMap = currentColorMap;
+            
+
+
+            updateText.text = "Animation ready";
+        }
+
+        void Update()
+        {
+            if(recorder.isVideoReady)
+            {
+               updateText.text = "Video is ready";
+               recorder.isVideoReady = false; 
+            }
+
         }
 
 

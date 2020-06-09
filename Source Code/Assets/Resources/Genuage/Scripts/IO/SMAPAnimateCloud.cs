@@ -9,6 +9,7 @@ SMAP Animation System
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Data;
 
 public class SMAPAnimateCloud : MonoBehaviour
 {
@@ -69,9 +70,13 @@ public class SMAPAnimateCloud : MonoBehaviour
         curvePositionX = new AnimationCurve(keyPositionX);
         curvePositionY = new AnimationCurve(keyPositionY);
         curvePositionZ = new AnimationCurve(keyPositionZ);
-        
-        //UpdateAnimation(); 
-        
+
+        //Fix for Scaling beginning to a 0 instead of 1
+        curveScaleX.MoveKey(0, new Keyframe(0,1));
+        curveScaleY.MoveKey(0, new Keyframe(0,1));
+        curveScaleZ.MoveKey(0, new Keyframe(0,1));
+        UpdateAnimation(); 
+
     }
 
     // public void InitializeAnimation()
@@ -102,20 +107,47 @@ public class SMAPAnimateCloud : MonoBehaviour
         curveRotationX.AddKey(animationTime, transform.localRotation.x);
         curveRotationY.AddKey(animationTime, transform.localRotation.y);
         curveRotationZ.AddKey(animationTime, transform.localRotation.z);
- 
-        // curveScaleX.AddKey(animationTime, transform.localScale.x);
-        // curveScaleY.AddKey(animationTime, transform.localScale.y);
-        // curveScaleZ.AddKey(animationTime, transform.localScale.z);
+
+        curveScaleX.AddKey(animationTime, transform.localScale.x);
+        curveScaleY.AddKey(animationTime, transform.localScale.y);
+        curveScaleZ.AddKey(animationTime, transform.localScale.z);
 
         curvePositionX.AddKey(animationTime, transform.localPosition.x);
         curvePositionY.AddKey(animationTime, transform.localPosition.y);
         curvePositionZ.AddKey(animationTime, transform.localPosition.z);
 
-        //Debug.Log(transform.localScale.x);
 
         UpdateAnimation(); 
     
     }
+
+    public void AddAnimationEvent(string eventName, string ColorMapName = "autumn")
+    {
+        AnimationEvent evt = new AnimationEvent();
+        evt.time = animationTime;
+
+        switch(eventName)
+        {
+            case "ColorMap":
+                evt.stringParameter = ColorMapName;
+                evt.functionName ="UpdateColorMap";
+                break;
+
+            default:
+                Debug.Log("Wrong Event called");
+                break;
+
+        }
+
+        clip.AddEvent(evt);
+
+    }
+
+    public void UpdateColorMap(string ColorMapName)
+    {
+        CloudUpdater.instance.ChangeCurrentColorMap(ColorMapName);
+    }
+
 
     public void UpdateKeyframe(int index)
     {
@@ -130,12 +162,12 @@ public class SMAPAnimateCloud : MonoBehaviour
         Keyframe TMPkeyRotationZ = new Keyframe(animationTime, transform.localRotation.z);
         curveRotationZ.MoveKey(index, TMPkeyRotationZ);
 
-        // Keyframe TMPkeyScaleX = new Keyframe(animationTime,transform.localScale.x);
-        // curveScaleX.MoveKey(index, TMPkeyScaleX);
-        // Keyframe TMPkeyScaleY = new Keyframe(animationTime,transform.localScale.y);
-        // curveScaleY.MoveKey(index, TMPkeyScaleY);
-        // Keyframe TMPkeyScaleZ = new Keyframe(animationTime,transform.localScale.z);
-        // curveScalez.MoveKey(index, TMPkeyScaleZ);
+        Keyframe TMPkeyScaleX = new Keyframe(animationTime,transform.localScale.x);
+        curveScaleX.MoveKey(index, TMPkeyScaleX);
+        Keyframe TMPkeyScaleY = new Keyframe(animationTime,transform.localScale.y);
+        curveScaleY.MoveKey(index, TMPkeyScaleY);
+        Keyframe TMPkeyScaleZ = new Keyframe(animationTime,transform.localScale.z);
+        curveScaleZ.MoveKey(index, TMPkeyScaleZ);
 
         Keyframe TMPkeyPositionX = new Keyframe(animationTime, transform.localPosition.x);
         curvePositionX.MoveKey(index, TMPkeyPositionX);
@@ -157,9 +189,9 @@ public class SMAPAnimateCloud : MonoBehaviour
         clip.SetCurve("",typeof(Transform),"localRotation.y",curveRotationY);
         clip.SetCurve("",typeof(Transform),"localRotation.z",curveRotationZ);
 
-        // clip.SetCurve("",typeof(Transform),"localScale.x",curveScaleX);
-        // clip.SetCurve("",typeof(Transform),"localScale.y",curveScaleY);
-        // clip.SetCurve("",typeof(Transform),"localScale.z",curveScaleZ);
+        clip.SetCurve("",typeof(Transform),"localScale.x",curveScaleX);
+        clip.SetCurve("",typeof(Transform),"localScale.y",curveScaleY);
+        clip.SetCurve("",typeof(Transform),"localScale.z",curveScaleZ);
 
         clip.SetCurve("",typeof(Transform),"localPosition.x",curvePositionX);
         clip.SetCurve("",typeof(Transform),"localPosition.y",curvePositionY);
@@ -201,9 +233,9 @@ public class SMAPAnimateCloud : MonoBehaviour
             curveRotationY.RemoveKey(i);
             curveRotationZ.RemoveKey(i);
             
-            // curveScaleX.RemoveKey(i);
-            // curveScaleY.RemoveKey(i);
-            // curveScaleZ.RemoveKey(i);
+            curveScaleX.RemoveKey(i);
+            curveScaleY.RemoveKey(i);
+            curveScaleZ.RemoveKey(i);
             
             curvePositionX.RemoveKey(i);
             curvePositionY.RemoveKey(i);
@@ -217,5 +249,6 @@ public class SMAPAnimateCloud : MonoBehaviour
 
         anim.RemoveClip(clip);
     }
+
 
 }

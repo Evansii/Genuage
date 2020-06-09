@@ -274,7 +274,7 @@ namespace Data
             ChangeColorMap(GetSelection(), newMapName, reverse);
             OnColorMapReversed(reverse);
             
-        }
+        }   
 
         public override void ChangeColorMap(int id, string newMapName = "autumn", bool reverse = false)
         {

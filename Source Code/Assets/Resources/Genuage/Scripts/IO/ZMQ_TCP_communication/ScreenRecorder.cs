@@ -91,6 +91,7 @@ public class ScreenRecorder : MonoBehaviour
 	private int screenHeight;
 	private bool threadIsProcessing;
 	private bool terminateThreadWhenDone;
+	public bool isVideoReady = false;
 	
 	void OnEnable() 
 	{
@@ -253,6 +254,7 @@ public class ScreenRecorder : MonoBehaviour
 
 		terminateThreadWhenDone = false;
 		threadIsProcessing = false;
+		isVideoReady = true;
 
 		print ("SCREENRECORDER IO THREAD FINISHED");
 		string commandline = "-i frame%d.bmp "+outputname+".mp4";
@@ -272,6 +274,7 @@ public class ScreenRecorder : MonoBehaviour
 
 		proc.Start();
 		proc.WaitForExit(100000);
+		
 
 		string[] tmpframes = Directory.GetFiles(persistentDataPath, "*.bmp");
 		foreach (string frame in tmpframes)
