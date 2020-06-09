@@ -45,8 +45,13 @@ namespace IO
         public List<float[]> dataList;
         public ReceiveStatus receive_status;
 
+        public int SMAPColorField;
+        
+        public string SMAPColorMap = "";
+
         public enum ReceiveStatus
-        {
+        {   
+            DATA_TYPE,
             INVALID_FORMAT,
             SUCCESS,
             TIMEOUT,
@@ -59,6 +64,13 @@ namespace IO
         protected void ReceiveOnePointData()
         {
             receive_status = ReceivePointValues();
+
+             if(receive_status == ReceiveStatus.DATA_TYPE)
+            {   
+                Debug.Log("RECEIVED DATA_TYPE");
+                ReceiveOnePointData();
+                
+            }
 
             if (receive_status == ReceiveStatus.SUCCESS)
             {

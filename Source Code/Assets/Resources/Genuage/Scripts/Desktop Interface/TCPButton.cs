@@ -50,7 +50,7 @@ namespace DesktopInterface
         }
         protected override void CreateThread()
         {
-            thread = new TCPIPCommunicator();
+            thread = new SMAPCommunicator();
         }
     }
 }

@@ -1,117 +1,314 @@
-﻿using System;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using System.IO;
+﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+using System.Net;
+using System.Net.Sockets;
+using System.Linq;
+using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using Data;
 
 namespace IO
 {
-
-
     public class SMAPCommunicator : ThreadCommunicator
     {
 
+        // Use this for initialization
         TcpListener listener;
-        String msg;
-        string datatype;
+
+        public string request_type ="";
+            
+        public string roi_processed;
+
+        public int nb_packages = 10;
+
+        public int package_count = 0;
+
+        public bool isLoading = false;
+
+        public bool isColorSet = false;
+
+        public List<float> col_x;
+        public List<float> col_y;
+        public List<float> col_z;
+        public List<float> col_pre;
+
+        public List<float> col_frame;
+
+        public List<float> col_hide;
+
+        public Dictionary<string ,string> colorTransition;
 
 
-        protected override void Run()
+        protected override void Run() 
         {
-            dataList = new List<float[]>();
-            listener = new TcpListener(IPAddress.Any, 5555);
-            Debug.Log("is listening");
-            ReceiveOnePointData();
-            DateTime firstTime = DateTime.Now;
-            DateTime timeLimit = firstTime.AddMinutes(1.0);
 
+            dataList = new List<float[]>();
+            
+            col_x = new List<float>();
+            col_y = new List<float>();
+            col_z = new List<float>();
+            col_pre = new List<float>();
+            col_frame = new List<float>();
+            col_hide = new List<float>();
+            
+            colorTransition = new Dictionary<string ,string>();
+
+            listener = new TcpListener(IPAddress.Any,5555);
+
+            InitialiseColorMapTransition();
+            ReceiveOnePointData();
         }
 
+
+        public void InitialiseColorMapTransition()
+        {
+            colorTransition.Add("blue cold", "Blues");
+            colorTransition.Add("green cold", "Greens");
+            colorTransition.Add("red hot", "hot");
+            colorTransition.Add("jet", "jet");
+            colorTransition.Add("hsv", "hsv");
+        }
+
+        public async void WaitForLoading()
+        {
+            Debug.Log("Loading...");
+            while(isLoading == false)
+            {
+                await Task.Yield();
+            }
+            Debug.Log("Loading complete");
+        
+        }
+
+
+
+        // Update is called once per frame
         protected override ReceiveStatus ReceivePointValues()
         {
+            
             listener.Start();
+            Debug.Log("is listening (Vincent Version)");
 
             while(true)
             {
-                 if(!listener.Pending())
+                if (!listener.Pending())
                 {
                 } 
                 else 
                 {
                     TcpClient client = listener.AcceptTcpClient();
                     NetworkStream ns = client.GetStream();
-
-
-                    switch(datatype)
+                    // if(request_type == "")
+                    // {
+                    //     request_type = GetDataType(client,ns);
+                    //     return ReceiveStatus.DATA_TYPE;
+                    // }
+                    switch(request_type)
                     {
                         case "":
-                            datatype = DatatypeRequest(client, ns);
+                            request_type = GetDataType(client,ns);
+                            break;
+
+                        // case "ID":
+                        //     Debug.Log("you got ID!");
+                        //     roi_processed = GetRoiID(client,ns);
+                        //     request_type ="";
+                        //     return ReceiveStatus.SUCCESS;
+                        //     break;
+
+                        case "LC":
+                            isLoading = false;
+                            Debug.Log("you got Data!");
+                            GetLocData(client,ns);
+                            request_type ="";
                             break;
                         
-                        case "Localizations":
-                            Debug.Log("Packages incoming");
-                            ReceiveLocalizationsPackages(client, ns);
+                        case "CO":
+                            SMAPColorMap = SetColorMap(client, ns);
+                            Debug.Log("Color Map changed to " + SMAPColorMap);
+                            isColorSet = true;
+                            request_type ="";
+                            //return ReceiveStatus.SET_COLOR;
+                            break;
+                        
+                        case "CF":
+                            SMAPColorField = SetColorField(client,ns);
+                            Debug.Log("Color coding set to Column " + SMAPColorField);
+                            request_type = "";
                             break;
 
 
-                           
+                        // case "ALL":
+                        //     GetSiteList(client,ns);
+                        //     Debug.Log("Site List Loaded");
+                        //     request_type = "";  
+                        //     return ReceiveStatus.SUCCESS;
+                        //     break;
 
-
+                        case "PK":
+                            GetNumberPackages(client,ns);
+                            Debug.Log("You got "+nb_packages+" packages");
+                            request_type ="";
+                            break;
 
                         default:
-                            Debug.Log("Wrong Datatype");
+                            Debug.Log(request_type +" is a wrong datatype");
+                            return ReceiveStatus.INVALID_FORMAT;
                             break;
+
                     }
 
+                    if((package_count == nb_packages) && (isColorSet == true))
+                    {
+                        package_count = 0;
+                        isColorSet = false;
+                        Debug.Log("All Data acquired");
+                        return ReceiveStatus.SUCCESS;
+                    }
 
-
-          
                 }
+            }
+        }
+
+        public void SendMovieRequest()
+        {
+            TcpClient client = new TcpClient("127.0.0.1",5000);
+            NetworkStream nwstream = client.GetStream();
+            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes("MOVIE"); 
+            nwstream.Write(bytesToSend,0,bytesToSend.Length);
+            Debug.Log("Request sent to reconstruct movie");
+            client.Close();
+
+        }
+
+        public void SendSiteRequest(string site_id)
+        {
+            TcpClient client = new TcpClient("127.0.0.1",5000);
+            NetworkStream nwstream = client.GetStream();
+            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(site_id);
+
+            Debug.Log("Sending request for the site " + site_id);
+            nwstream.Write(bytesToSend,0,bytesToSend.Length);
+            client.Close();
+
+        }
+
+        public void SendColorMapUpdate(string color_map)
+        {
+            var color_translation = colorTransition
+                            .FirstOrDefault(x => x.Value.Contains(color_map))
+                            .Key;
+
+
+            TcpClient client = new TcpClient("127.0.0.1",5000);
+            NetworkStream nwstream = client.GetStream();
+            byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes("COLOR"); 
+            nwstream.Write(bytesToSend,0,bytesToSend.Length);
+            client.Close();
+
+            client = new TcpClient("127.0.0.1",5000);
+            nwstream = client.GetStream();
+            bytesToSend = ASCIIEncoding.ASCII.GetBytes(color_translation); 
+            nwstream.Write(bytesToSend,0,bytesToSend.Length);
+            client.Close();
+
+            Debug.Log("Request sent to update Color Map to " + color_translation);
+
+
+        }
+
+        public string SetColorMap(TcpClient client, NetworkStream ns)
+        {
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            string map = Encoding.UTF8.GetString(bytes,0, bytes_read);
+            if (colorTransition.ContainsKey(map))
+                return colorTransition[map];
+            else
+                return "autumn";    
+            
+        }
+
+         public int SetColorField(TcpClient client, NetworkStream ns)
+        {
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            int color_field = BitConverter.ToInt32(bytes,0);
+            Debug.Log(color_field);
+            return color_field;
+            
+        }
+        
+        public void GetLocData(TcpClient client, NetworkStream ns)
+        {
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            var data_to_process = new float[bytes_read/4];
+            Buffer.BlockCopy(bytes,0,data_to_process,0,bytes_read);
+            var whole_data = new float[data_to_process.Length];
+
+            var index = 0;
+            for(int i =0; i<data_to_process.Length; i += 6)
+            {
+
+                float[] tmp = new float[6];
+                Array.Copy(data_to_process,i,tmp,0,6);
+
+                col_x.Add(tmp[0]);
+                col_y.Add(tmp[1]);
+                col_z.Add(tmp[2]);
+                col_pre.Add(tmp[3]);
+                col_frame.Add(tmp[4]);
+                col_hide.Add(tmp[5]);
+
+                index++;               
 
             }
-        
-        
+            Debug.Log(package_count);
+            package_count++;
+            isLoading = true;
+            if(package_count == nb_packages)
+            {
+                dataList.Add(col_x.ToArray());
+                col_x.Clear();
+                dataList.Add(col_y.ToArray());
+                col_y.Clear();
+                dataList.Add(col_z.ToArray());
+                col_z.Clear();
+                dataList.Add(col_pre.ToArray());
+                col_pre.Clear();
+                dataList.Add(col_frame.ToArray());
+                col_frame.Clear();
+                dataList.Add(col_hide.ToArray());
+                col_hide.Clear();
+            }
+
+            
+            //Data processed in column?
+            
+        }
+
+        public void GetNumberPackages(TcpClient client, NetworkStream ns)
+        {
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            nb_packages = BitConverter.ToInt32(bytes,0);
+
         }
 
 
-        public string DatatypeRequest(TcpClient client, NetworkStream ns)
+        public string GetDataType(TcpClient client, NetworkStream ns)
         {
-            Byte[] bytes = new Byte[client.ReceiveBufferSize];
-            Int32 bytesread = ns.Read(bytes, 0, bytes.Length);
-            var msg = System.Text.Encoding.ASCII.GetString(bytes, 0, bytesread);
-            client.Close();
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            string msg = Encoding.UTF8.GetString(bytes,0, bytes_read);
             return msg;
 
         }
-
-        public void ReceiveLocalizationsPackages(TcpClient client, NetworkStream ns)
-        {
-            Byte[] bytes = new Byte[client.ReceiveBufferSize];
-            Int32 bytesread = ns.Read(bytes, 0, bytes.Length);
-            var locs = new float[bytes.Length / 4];
-            Buffer.BlockCopy(bytes, 0, locs, 0, bytes.Length);
-
-            float[] locX = new float[locs.Length/4];
-            float[] locY = new float[locs.Length/4];
-            float[] locZ = new float[locs.Length/4];
-            float[] locPre = new float[locs.Length/4];
-
-            
-
-            for( int i = 0; i<locs.Length; i += 4)
-            {
-
-
-
-            }
-
-
-        }
-
 
 
         protected override void StopConnection()
@@ -120,9 +317,8 @@ namespace IO
             isRunning = false;
 
         }
-    
-        
 
+        
 
     }
 

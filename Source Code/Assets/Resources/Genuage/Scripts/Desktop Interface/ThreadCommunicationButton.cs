@@ -35,6 +35,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using IO;
+using Data;
+
 namespace DesktopInterface
 {
 
@@ -101,7 +103,8 @@ namespace DesktopInterface
 
                     if (thread.receive_status == ThreadCommunicator.ReceiveStatus.SUCCESS)
                     {
-                        CloudLoader.instance.LoadFromConnection(thread.dataList);
+                        CloudLoader.instance.LoadFromConnection(thread.dataList, thread.SMAPColorField);
+                        CloudUpdater.instance.ChangeColorMap(0,thread.SMAPColorMap, false);
                     }
 
                     if (thread.receive_status == ThreadCommunicator.ReceiveStatus.TIMEOUT)

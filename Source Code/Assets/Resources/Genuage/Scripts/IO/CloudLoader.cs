@@ -125,7 +125,7 @@ namespace IO
 
         }
 
-        public void LoadFromConnection(List<float[]> collumnDataList)
+        public void LoadFromConnection(List<float[]> collumnDataList, int SMAPColorField)
         {
             savedata = null;
             window = ModalWindowManager.instance.CreateModalWindow("Loading the cloud, please wait...");
@@ -141,10 +141,10 @@ namespace IO
                     }
                 }
             }
-            GameObject cloud = CreateCloudPoint(collumnDataList);
+            GameObject cloud = CreateCloudPoint(collumnDataList, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
             PutInMemory(cloud);
             Destroy(window);
-            OnCloudCreated(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
+           //OnCloudCreated(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
 
         }
 
@@ -651,7 +651,7 @@ namespace IO
             CloudStorage.instance.AddCloud(cloud);
         }
 
-        private GameObject CreateCloudPoint(List<float[]> collumnDataList, string file_path = null, bool isJSON = false, string json_path = null)
+        private GameObject CreateCloudPoint(List<float[]> collumnDataList, string file_path = null, bool isJSON = false, string json_path = null, int SMAPcolorcolumn = 100, bool isSMAP = false)
         {
             GameObject container = Instantiate(_cloudPointPrefab) as GameObject; /// GameObject that is the parent of the CloudPoint (used for CloudParent offset)
             GameObject root = container.transform.Find("CloudPoint").gameObject; /// GameObject where the mesh will be displayed
@@ -666,7 +666,7 @@ namespace IO
             }
             else
             {
-                int[] intarray = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                int[] intarray = new int[9] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                 for (int i = 0; i< collumnDataList.Count; i++)
                 {
                     if(i < intarray.Length)
@@ -676,6 +676,17 @@ namespace IO
                 }
 
                 rootdata.globalMetaData.displayCollumnsConfiguration = intarray;
+
+                /**
+                Vincent Casamayou 13/05/2020 - SMAP COMMUNICATION
+                - Affect Color Coding to the specified Column in SMAP
+                - Add a display/hide bool to the data table for each point    
+                **/
+            
+                if(SMAPcolorcolumn != 100 )
+                    rootdata.globalMetaData.displayCollumnsConfiguration[3] = SMAPcolorcolumn;
+                
+                rootdata.globalMetaData.displayCollumnsConfiguration[8] = 5;
             }
             for ( int i = 0 ; i < collumnDataList[0].Length; i++)
             {
@@ -685,7 +696,7 @@ namespace IO
                 
             }
 
-            LoadCloudData(rootdata,file_path,isJSON);
+            LoadCloudData(rootdata,file_path,isJSON, isSMAP);
 
             root.name = "CloudPoint";
             root.transform.position = container.transform.position;
@@ -702,7 +713,8 @@ namespace IO
         }
 
 
-        public void LoadCloudData(CloudData cloud_data,string file_path = null,bool isJSON = false)
+
+        public void LoadCloudData(CloudData cloud_data,string file_path = null,bool isJSON = false, bool isSMAP = false)
         {
             int N = cloud_data.columnData[0].Length;
             // Init lists
@@ -712,6 +724,8 @@ namespace IO
             float[] _intensity = new float[N];
             float[] _time = new float[N];
             float[] _trajectory = new float[N];
+
+            float[] _hidden = new float[N];
             Color[] _colors = new Color[N];
 
             float[] _phi = new float[N];
@@ -752,6 +766,9 @@ namespace IO
 
                 _phi[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[6]][i];
                 _theta[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[7]][i];
+                
+                if(isSMAP == true)
+                    _hidden[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[8]][i];
 
                 //Debug.Log("Frame " + i + " : " + _frame[i]);
                 _intensity[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[3]][i];
@@ -823,6 +840,14 @@ namespace IO
                 cloud_data.pointDataTable[point].trajectory = _trajectory[point];
                 cloud_data.pointDataTable[point].phi_angle = _phi[point];
                 cloud_data.pointDataTable[point].theta_angle = _theta[point];
+                
+                //Vincent Casamayou 15/05/2020 - SMAP COMMUNICATION
+                //Hide point at creation
+                if(_hidden[point] != 0f)
+                {
+                    cloud_data.pointMetaDataTable[point].isHidden = true;
+                }
+                
                 //cloud_data.pointDataTable[point].color = _colors[point];
                 cloud_data.pointDataTable[point]._color_index = _colors[point].r;
 
