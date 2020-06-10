@@ -49,8 +49,6 @@ namespace DesktopInterface
 
         public Button deleteKeyButton;
         public Button updateKeyButton;
-        public Button rankUpButton;
-        public Button rankDownButton;
 
         public InputField recordTimeInputField;
         public InputField nameInputField;
@@ -110,11 +108,12 @@ namespace DesktopInterface
 
 
             //Keyframe Manager
+            deleteKeyButton.onClick.AddListener(DeleteKeyframe);
             updateKeyButton.onClick.AddListener(UpdateKeyframe);
-
             keyframeManagerDropdown.onValueChanged.AddListener(HideKeyframeShadows);
-
             hideShadowToggle.onValueChanged.AddListener(UpdateHiddenShadows);
+
+
 
 
 
@@ -315,6 +314,31 @@ namespace DesktopInterface
             keyframeList.Clear();
             UpdateKeyframeManager();
             keyframeCount = 0;
+
+        }
+
+        public void DeleteKeyframe()
+        {
+            //Remove Keyframe
+            cloudAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
+
+            keyframeList.RemoveAt(keyframeManagerDropdown.value);
+
+            if(keyframeManagerDropdown.value != keyframeList.Count)
+            {
+                for(int i = 0; i<keyframeList.Count; i++)
+                {
+                    int key = Int32.Parse(keyframeList[i]);
+                    keyframeList[i] = (key - 1).ToString(); 
+                }
+            }
+
+            keyframeCount--;
+
+            //Remove Keyframe Shadow
+            Destroy(shadowsList[keyframeManagerDropdown.value]);
+
+            UpdateKeyframeManager();
 
         }
 

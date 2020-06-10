@@ -8,6 +8,7 @@ SMAP Animation System
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Data;
 
@@ -209,7 +210,7 @@ public class SMAPAnimateCloud : MonoBehaviour
         {
             Debug.Log("Animation playing");
             anim.Play();
-
+ 
         }
         else
         {
@@ -224,30 +225,106 @@ public class SMAPAnimateCloud : MonoBehaviour
         Debug.Log("Timestep is "+ keyframeTimestep);
     }
 
+
+    //HERE IF YOU WANT TO REMOVE NEW VARIABLES
+    public void RemoveCurves(int i)
+    {
+        curveRotationW.RemoveKey(i);
+        curveRotationX.RemoveKey(i);
+        curveRotationY.RemoveKey(i);
+        curveRotationZ.RemoveKey(i);
+        
+        curveScaleX.RemoveKey(i);
+        curveScaleY.RemoveKey(i);
+        curveScaleZ.RemoveKey(i);
+        
+        curvePositionX.RemoveKey(i);
+        curvePositionY.RemoveKey(i);
+        curvePositionZ.RemoveKey(i);
+
+    }
+
+
+    public void ShiftCurves(int index, int shift = 0)
+    {
+        int key_to_shift = index - shift;
+        
+        if(key_to_shift >= curveRotationW.keys.Length)
+        {
+            key_to_shift = curveRotationW.keys.Length - 1;
+        }
+        else if(key_to_shift <= 0)
+        {
+            key_to_shift = 1;
+        }
+
+
+        curveRotationW.MoveKey(index, curveRotationW.keys[key_to_shift]);
+        curveRotationX.MoveKey(index, curveRotationX.keys[key_to_shift]);
+        curveRotationY.MoveKey(index, curveRotationY.keys[key_to_shift]);
+        curveRotationZ.MoveKey(index, curveRotationZ.keys[key_to_shift]);
+
+        curveScaleX.MoveKey(index, curveScaleX.keys[key_to_shift]);
+        curveScaleY.MoveKey(index, curveScaleY.keys[key_to_shift]);
+        curveScaleZ.MoveKey(index, curveScaleZ.keys[key_to_shift]);
+
+        curvePositionX.MoveKey(index, curvePositionX.keys[key_to_shift]);
+        curvePositionY.MoveKey(index, curvePositionY.keys[key_to_shift]);
+        curvePositionZ.MoveKey(index, curvePositionZ.keys[key_to_shift]);
+
+    }
+
+
     public void RemoveAnimation()
     {
-        for(int i = 0; i < curvePositionX.length ; i++)
+        for(int i = 0; i < curvePositionX.keys.Length ; i++)
         {
-            curveRotationW.RemoveKey(i);
-            curveRotationX.RemoveKey(i);
-            curveRotationY.RemoveKey(i);
-            curveRotationZ.RemoveKey(i);
-            
-            curveScaleX.RemoveKey(i);
-            curveScaleY.RemoveKey(i);
-            curveScaleZ.RemoveKey(i);
-            
-            curvePositionX.RemoveKey(i);
-            curvePositionY.RemoveKey(i);
-            curvePositionZ.RemoveKey(i);
+            RemoveCurves(i);
         }
 
         
         indexkey = 0;
 
-        UpdateAnimation();
+        clip.ClearCurves();
 
         anim.RemoveClip(clip);
+    }
+
+    public void RemoveKeyframe(int index)
+    {
+        float timestamp = curvePositionX.keys[index].time;
+    
+        for(int i = index; i <= curvePositionX.keys.Length-1; i++)
+        {
+            Debug.Log("Shift Keyframe " + i );
+            if( i == curvePositionX.keys.Length-1)
+            {
+                RemoveCurves(i);
+            }
+            else
+            {
+                ShiftCurves(i,-1);
+            }
+        }
+
+
+        //Remove Event
+        AnimationEvent[] allEvents = clip.events;
+        if(allEvents.Length != 0)
+        {
+            var eventsList = allEvents.ToList(); 
+            for(int j =0; j < eventsList.Count; j++)
+            {
+                if(eventsList[j].time == timestamp)
+                {
+                   eventsList.RemoveAt(j); 
+                }
+            }
+            clip.events = eventsList.ToArray();
+        }
+
+        UpdateAnimation();
+
     }
 
 
