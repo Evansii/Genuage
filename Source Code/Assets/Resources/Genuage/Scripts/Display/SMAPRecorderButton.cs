@@ -326,7 +326,7 @@ namespace DesktopInterface
 
             if(keyframeManagerDropdown.value != keyframeList.Count)
             {
-                for(int i = 0; i<keyframeList.Count; i++)
+                for(int i = keyframeManagerDropdown.value; i<keyframeList.Count; i++)
                 {
                     int key = Int32.Parse(keyframeList[i]);
                     keyframeList[i] = (key - 1).ToString(); 
@@ -334,9 +334,14 @@ namespace DesktopInterface
             }
 
             keyframeCount--;
-
             //Remove Keyframe Shadow
             Destroy(shadowsList[keyframeManagerDropdown.value]);
+            shadowsList.RemoveAt(keyframeManagerDropdown.value);
+
+            for(int j = 0; j < shadowsList.Count;j++)
+            {
+                shadowsList[j].name ="Keyframe Shadow "+(j+1);
+            }
 
             UpdateKeyframeManager();
 
@@ -364,6 +369,7 @@ namespace DesktopInterface
 
             if(currentColorMap != previousColorMap)
             {
+                Debug.Log("Event added");
                 cloudAnim.AddAnimationEvent("ColorMap", currentColorMap);
             }
 

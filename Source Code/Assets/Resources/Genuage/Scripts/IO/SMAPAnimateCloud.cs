@@ -294,18 +294,21 @@ public class SMAPAnimateCloud : MonoBehaviour
     {
         float timestamp = curvePositionX.keys[index].time;
     
-        for(int i = index; i <= curvePositionX.keys.Length-1; i++)
+        for(int i = index; i < curvePositionX.keys.Length; i++)
         {
             Debug.Log("Shift Keyframe " + i );
             if( i == curvePositionX.keys.Length-1)
             {
+                Debug.Log("Last Curve removed");
                 RemoveCurves(i);
+                break;
             }
             else
             {
                 ShiftCurves(i,-1);
             }
         }
+        
 
 
         //Remove Event
