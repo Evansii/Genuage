@@ -293,6 +293,8 @@ public class SMAPAnimateCloud : MonoBehaviour
     public void RemoveKeyframe(int index)
     {
         float timestamp = curvePositionX.keys[index].time;
+
+        animationTime = animationTime - keyframeTimestep;
     
         for(int i = index; i < curvePositionX.keys.Length; i++)
         {

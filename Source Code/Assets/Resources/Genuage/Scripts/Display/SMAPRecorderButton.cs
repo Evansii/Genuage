@@ -46,7 +46,8 @@ namespace DesktopInterface
         public Button saveKeyButton;
         public Button previewButton;
         public Button deleteAnimButton;
-
+        public Button recordAnimButton;
+        
         public Button deleteKeyButton;
         public Button updateKeyButton;
 
@@ -89,6 +90,7 @@ namespace DesktopInterface
             recorder = camera.GetComponent<ScreenRecorder>();
 
             recordButton.onClick.AddListener(Record);
+            recordAnimButton.onClick.AddListener(RecordAnimation);
 
             previewButton.onClick.AddListener(PreviewAnimation);
 
@@ -134,27 +136,28 @@ namespace DesktopInterface
         public void Record()
         {
             HideBox();
-            if(isAnimated)
-            {
-                recordTime = cloudAnim.animationTime + 1f;
-                UpdateFrameNumber();
-                cloudAnim.PlayAnimation();
-            }
+            hiddenShadows = true;
+            HideKeyframeShadows(0);
+            // if(isAnimated)
+            // {
+            //     recordTime = cloudAnim.animationTime + 1f;
+            //     UpdateFrameNumber();
+            //     cloudAnim.PlayAnimation();
+            // }
+            isRecording = true;
+            Debug.Log("Record ON");
+            updateText.text = "Recording...";
+            recorder.enabled = true;
 
-            if(!isRecording)
-            {
-                isRecording = true;
-                Debug.Log("Record ON");
-                updateText.text = "Recording...";
-                recorder.enabled = true;
-            }
-            else
-            {
-                Debug.Log("Record OFF");
-                isRecording = false;
-                recorder.enabled = false;
-            }
 
+        }
+
+        public void RecordAnimation()
+        {
+            recordTime = cloudAnim.animationTime + 1f;
+            UpdateFrameNumber();
+            cloudAnim.PlayAnimation();
+            Record();
         }
 
 
@@ -211,6 +214,7 @@ namespace DesktopInterface
                     }
                 }
             }
+            hiddenShadows = false;
         }
 
         public void UpdateHiddenShadows(bool select)
@@ -334,6 +338,7 @@ namespace DesktopInterface
             }
 
             keyframeCount--;
+
             //Remove Keyframe Shadow
             Destroy(shadowsList[keyframeManagerDropdown.value]);
             shadowsList.RemoveAt(keyframeManagerDropdown.value);

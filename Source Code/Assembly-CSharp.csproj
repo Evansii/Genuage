@@ -135,6 +135,7 @@
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\PROTO2DOrientationButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\PROTOORientationButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\PROTOTRajectoriesButton.cs" />
+     <Compile Include="Assets\Resources\Genuage\Scripts\Display\SMAPClippingPlaneButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\SMAPFrameControlButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\SMAPRecorderButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Display\StaringLabel.cs" />

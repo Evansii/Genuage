@@ -45,6 +45,9 @@ public class CloudBox : MonoBehaviour
 
     CloudData _cloud_status;
     GameObject _box;
+    GameObject _clipPlaneX;
+    GameObject _clipPlaneY;
+    GameObject _clipPlaneZ;
     Material _material;
     bool _is_grabbed;
 
@@ -63,8 +66,20 @@ public class CloudBox : MonoBehaviour
             3, 4
         };
 
+    int[] _clipPlaneLines = {
+            0, 1,
+            0, 3,
+            1, 2,
+            3, 2,
+    };
+
+    public enum PlaneAxis {X,Y,Z};
+
     public void Activate () {
+
         _cloud_status = GetComponent<CloudData>();
+
+        //Box Cloud Initialization
         _box = new GameObject("Box");
         _box.AddComponent<DragMouse>();
         _box.GetComponent<DragMouse>().enabled = !DesktopApplication.instance.VR_Enabled;
@@ -77,6 +92,17 @@ public class CloudBox : MonoBehaviour
         AddFollowComponents(this.gameObject, _box);
         AddDraggableComponents(_box);
         transform.parent.GetComponent<CloudObjectRefference>().box = _box;
+
+        //Clipping Planes Initialization
+        _clipPlaneX = InitializeClippingPlaneObject();
+        _clipPlaneY = InitializeClippingPlaneObject();
+        _clipPlaneZ = InitializeClippingPlaneObject();
+
+        CreateClippingPlane(_clipPlaneX,PlaneAxis.X);
+        CreateClippingPlane(_clipPlaneY,PlaneAxis.Y);
+        CreateClippingPlane(_clipPlaneZ, PlaneAxis.Z);
+
+
     }
 
     private void AddDraggableComponents(GameObject go)
@@ -126,6 +152,74 @@ public class CloudBox : MonoBehaviour
         _box.tag = "PointCloud";
     }
 
+    public GameObject InitializeClippingPlaneObject()
+    {
+        GameObject _clipPlane = new GameObject("Desktop Clipping Plane");
+        _clipPlane.AddComponent<MeshFilter>();
+        _material = new Material(Shader.Find("Unlit/Color"));
+        _material.SetColor("_Color", Color.yellow);
+        _clipPlane.AddComponent<MeshRenderer>().material = _material;
+        _clipPlane.transform.SetParent(_box.transform,false);
+        _clipPlane.AddComponent<Rigidbody>().useGravity = false;
+        AddFollowComponents(_clipPlane, _box);
+        _clipPlane.GetComponent<VRTK_RigidbodyFollow>().followsPosition = false;
+        return _clipPlane;
+    }
+
+    public void CreateClippingPlane(GameObject plane, PlaneAxis axis)
+    {
+        Mesh meshClip = plane.GetComponent<MeshFilter>().mesh;
+        Vector3[] vertices = new Vector3[4];
+
+        switch (axis)
+        {   
+            case PlaneAxis.X:
+                Vector3[] verticesX = {
+                    new Vector3(-0.5f, - 0.5f, - 2.3f),
+                    new Vector3(-0.5f ,  0.5f, - 2.3f),
+                    new Vector3(-0.5f ,  0.5f, 2.3f),
+                    new Vector3(-0.5f , - 0.5f, 2.3f)
+                };
+                plane.name = "Desktop Clipping Plane X";
+                vertices = verticesX;
+                break;
+
+            case PlaneAxis.Y:
+                Vector3[] verticesY = {
+                    new Vector3(-0.5f , -0.5f, - 2.3f),
+                    new Vector3(0.5f , -0.5f, - 2.3f),
+                    new Vector3(0.5f , -0.5f, 2.3f),
+                    new Vector3(-0.5f , -0.5f, 2.3f)
+                };
+                plane.name = "Desktop Clipping Plane Y";
+                vertices = verticesY;
+                break;
+
+            case PlaneAxis.Z:
+                Vector3[] verticesZ = {
+                    new Vector3(-0.5f , -0.5f, -2.3f),
+                    new Vector3(0.5f , -0.5f, -2.3f),
+                    new Vector3(0.5f , 0.5f, -2.3f),
+                    new Vector3(-0.5f , 0.5f, -2.3f)
+                };
+                plane.name = "Desktop Clipping Plane Z";
+                vertices = verticesZ;
+                break;
+
+            default:
+                Debug.Log("Wrong Axis Plane");
+                break;
+        }
+
+
+        meshClip.Clear();
+        meshClip.vertices = vertices;
+        meshClip.SetIndices(_clipPlaneLines, MeshTopology.Lines, 0);
+        
+        plane.transform.localScale = _cloud_status.globalMetaData.box_scale;
+    }
+
+
     public void Hovered(object o, InteractableObjectEventArgs e)
     {
         if (!_is_grabbed)
@@ -153,4 +247,7 @@ public class CloudBox : MonoBehaviour
         _is_grabbed = false;
         _material.color = UIColors._hovered;
     }
+
+
+       
 }
