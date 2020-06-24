@@ -17,6 +17,8 @@ namespace DesktopInterface
         GameObject clipPlaneY;
         GameObject clipPlaneZ;
 
+        public GameObject clipV2;
+
 
         public Slider sliderX;
         public Slider sliderY;
@@ -36,18 +38,19 @@ namespace DesktopInterface
         {
             if(isInit == false)
             {   
+                //clipV2.SetActive(true);
                 data = CloudUpdater.instance.LoadCurrentStatus();
-                clipPlaneX = GameObject.Find("Desktop Clipping Plane X");
-                sliderX.minValue = data.globalMetaData.xMin;
-                sliderX.maxValue = data.globalMetaData.xMax;
+                // clipPlaneX = GameObject.Find("Desktop Clipping Plane X");
+                // sliderX.minValue = data.globalMetaData.xMin;
+                // sliderX.maxValue = data.globalMetaData.xMax;
 
-                clipPlaneY = GameObject.Find("Desktop Clipping Plane Y");
-                sliderY.minValue = data.globalMetaData.yMin;
-                sliderY.maxValue = data.globalMetaData.yMax;
+                // clipPlaneY = GameObject.Find("Desktop Clipping Plane Y");
+                // sliderY.minValue = data.globalMetaData.yMin;
+                // sliderY.maxValue = data.globalMetaData.yMax;
 
-                clipPlaneZ = GameObject.Find("Desktop Clipping Plane Z");
-                sliderZ.minValue = data.globalMetaData.zMin;
-                sliderZ.maxValue = data.globalMetaData.zMax;
+                // clipPlaneZ = GameObject.Find("Desktop Clipping Plane Z");
+                // sliderZ.minValue = data.globalMetaData.zMin;
+                // sliderZ.maxValue = data.globalMetaData.zMax;
                 isInit = true;
             }
 

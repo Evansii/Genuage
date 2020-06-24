@@ -61,6 +61,9 @@
      <Compile Include="Assets\DesignScript\UILocation.cs" />
      <Compile Include="Assets\DesignScript\UISize.cs" />
      <Compile Include="Assets\DesignScript\VRMaterials.cs" />
+     <Compile Include="Assets\FlexibleUISystems\FlexibleDraggableObject\Scripts\FlexibleDraggableObject.cs" />
+     <Compile Include="Assets\FlexibleUISystems\FlexibleDraggableObject\Scripts\FlexibleResizeHandler.cs" />
+     <Compile Include="Assets\FlexibleUISystems\Generic\FlexibleExtensions.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\CloudChild.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\CloudChildAngleMeasure.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\CloudChildConvexHull.cs" />
@@ -80,6 +83,8 @@
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\AppCloseButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\ButtonDensityCalculator.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\CalculateMeanOrientationButton.cs" />
+     <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\ClippingPlaneDesktop.cs" />
+     <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\ClippingPlaneZDesktop.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\CloseCloudByIDButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\CloudSelection\CloudSelectionButton.cs" />
      <Compile Include="Assets\Resources\Genuage\Scripts\Desktop Interface\CloudSelection\CreateDisplayButtons.cs" />
