@@ -35,6 +35,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Display;
 using Data;
+using VRTK;
 
 namespace DesktopInterface
 {
@@ -66,11 +67,20 @@ namespace DesktopInterface
             _VR_Camera.enabled = false;
             _desktop_camera.enabled = true;
             _desktop_camera.gameObject.SetActive(true);
+            VRTK_SDKManager.AttemptUnloadSDKSetup(true);
         }
 
         public void SwitchVR()
         {
             _vr_enabled = !_vr_enabled;
+            if(_vr_enabled)
+            {
+                VRTK_SDKManager.instance.TryLoadSDKSetupFromList(true);
+            }
+            else
+            {
+                VRTK_SDKManager.AttemptUnloadSDKSetup(true);
+            }
 
             _desktop_camera.enabled = !_vr_enabled;
             _desktop_camera.gameObject.SetActive(!_vr_enabled);

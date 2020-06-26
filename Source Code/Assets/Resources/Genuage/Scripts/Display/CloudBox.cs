@@ -94,13 +94,13 @@ public class CloudBox : MonoBehaviour
         transform.parent.GetComponent<CloudObjectRefference>().box = _box;
 
         //Clipping Planes Initialization
-        _clipPlaneX = InitializeClippingPlaneObject();
-        _clipPlaneY = InitializeClippingPlaneObject();
-        _clipPlaneZ = InitializeClippingPlaneObject();
+        // _clipPlaneX = InitializeClippingPlaneObject();
+        // _clipPlaneY = InitializeClippingPlaneObject();
+        // _clipPlaneZ = InitializeClippingPlaneObject();
 
-        CreateClippingPlane(_clipPlaneX,PlaneAxis.X);
-        CreateClippingPlane(_clipPlaneY,PlaneAxis.Y);
-        CreateClippingPlane(_clipPlaneZ, PlaneAxis.Z);
+        // CreateClippingPlane(_clipPlaneX,PlaneAxis.X);
+        // CreateClippingPlane(_clipPlaneY,PlaneAxis.Y);
+        // CreateClippingPlane(_clipPlaneZ, PlaneAxis.Z);
 
 
     }

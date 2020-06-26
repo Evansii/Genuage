@@ -85,7 +85,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3201942227726651707}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &3201942227726651687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,8 +121,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxFrames: 15
   frameRate: 30
+  outputname: 
+  updateText: {fileID: 0}
+  box: {fileID: 0}
   persistentDataPath: 
   ffmpath: 
+  isVideoReady: 0
 --- !u!124 &3201942227726651680
 Behaviour:
   m_ObjectHideFlags: 0
