@@ -72,10 +72,20 @@ public class SMAPAnimateCloud : MonoBehaviour
         curvePositionY = new AnimationCurve(keyPositionY);
         curvePositionZ = new AnimationCurve(keyPositionZ);
 
-        //Fix for Scaling beginning to a 0 instead of 1
-        curveScaleX.MoveKey(0, new Keyframe(0,1));
-        curveScaleY.MoveKey(0, new Keyframe(0,1));
-        curveScaleZ.MoveKey(0, new Keyframe(0,1));
+        //Initialize Object Position
+        curveRotationW.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.w));
+        curveRotationX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.x));
+        curveRotationY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.y));
+        curveRotationZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.z));
+
+        curveScaleX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.x));
+        curveScaleY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.y));
+        curveScaleZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.z));
+
+        curvePositionX.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.x));
+        curvePositionY.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.y));
+        curvePositionZ.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.z));
+
         UpdateAnimation(); 
 
     }

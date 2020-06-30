@@ -33,6 +33,8 @@ namespace DesktopInterface
 
         SMAPAnimateCloud cloudAnim;
 
+        SMAPAnimateCloud cameraAnim;
+
         GameObject camera;
 
         GameObject cloudpoint;
@@ -45,7 +47,6 @@ namespace DesktopInterface
         public Button recordButton;
         public Button saveKeyButton;
         public Button previewButton;
-        public Button deleteAnimButton;
         public Button recordAnimButton;
         
         public Button deleteKeyButton;
@@ -96,8 +97,6 @@ namespace DesktopInterface
 
             saveKeyButton.onClick.AddListener(SaveKeyframe);
 
-            deleteAnimButton.onClick.AddListener(DeleteAnimation);
-
             recordTimeInputField.text = recordTime.ToString();
             recordTimeInputField.onEndEdit.AddListener(UpdateRecordTime);
 
@@ -123,10 +122,11 @@ namespace DesktopInterface
 
 
 
-        public override void Execute()
+        public override void Execute() 
         {
             cloudpoint = GameObject.FindWithTag("PointCloud");
             cloudAnim = cloudpoint.GetComponent<SMAPAnimateCloud>();
+            cameraAnim = camera.GetComponent<SMAPAnimateCloud>();
             data = CloudUpdater.instance.LoadCurrentStatus(); 
             box = GameObject.Find("Box").GetComponent<MeshRenderer>();
             box.enabled = true;
@@ -157,6 +157,7 @@ namespace DesktopInterface
             recordTime = cloudAnim.animationTime + 1f;
             UpdateFrameNumber();
             cloudAnim.PlayAnimation();
+            cameraAnim.PlayAnimation();
             Record();
         }
 
@@ -298,33 +299,24 @@ namespace DesktopInterface
         public void UpdateKeyframe()
         {
             cloudAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
+            cameraAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
             UpdateShadowPosition();
 
         }
 
 
-
         public void PreviewAnimation()
         {
             cloudAnim.PlayAnimation();
+            cameraAnim.PlayAnimation();
         }
 
-
-        public void DeleteAnimation()
-        {
-            cloudAnim.RemoveAnimation();
-            isAnimated = false;
-            updateText.text = "No Animation detected";
-            keyframeList.Clear();
-            UpdateKeyframeManager();
-            keyframeCount = 0;
-
-        }
 
         public void DeleteKeyframe()
         {
             //Remove Keyframe
             cloudAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
+            cameraAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
 
             keyframeList.RemoveAt(keyframeManagerDropdown.value);
 
@@ -365,10 +357,9 @@ namespace DesktopInterface
         { 
 
             string currentColorMap = cloudpoint.GetComponent<CloudData>().globalMetaData.colormapName;
-
-            Debug.Log(currentColorMap); 
             
             cloudAnim.AddKeyframe();
+            cameraAnim.AddKeyframe();
             if(!isAnimated)
                 isAnimated = true;
 
