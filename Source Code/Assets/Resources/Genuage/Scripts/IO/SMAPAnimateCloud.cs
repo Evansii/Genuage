@@ -10,10 +10,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Data;
 
 public class SMAPAnimateCloud : MonoBehaviour
 {
+
+    public bool isRectTransform;
+    CloudData data;
     public float indexkey = 0.0f;
 
     public float keyframeTimestep = 5.0f;
@@ -21,6 +25,8 @@ public class SMAPAnimateCloud : MonoBehaviour
     public float timestep = 5f;
 
     public float animationTime;
+
+    RectTransform UItransform;
 
     Animation anim;
 
@@ -37,6 +43,10 @@ public class SMAPAnimateCloud : MonoBehaviour
     public Keyframe keyPositionY = new Keyframe();
     public Keyframe keyPositionZ = new Keyframe();
 
+    //Only for RectTransform (ClippingPlane)
+    public Keyframe keyHeight = new Keyframe();
+    public Keyframe keyWidth = new Keyframe();
+
     public AnimationClip clip;
 
     AnimationCurve curveRotationW;
@@ -52,8 +62,14 @@ public class SMAPAnimateCloud : MonoBehaviour
     AnimationCurve curvePositionY;
     AnimationCurve curvePositionZ;
 
+    //Only for RectTransform (ClippingPlane)
+    AnimationCurve curveHeight;
+    AnimationCurve curveWidth;
+
+
     void Start()    
     {
+
         anim = gameObject.AddComponent(typeof(Animation)) as Animation;
 
         clip = new AnimationClip();
@@ -72,38 +88,39 @@ public class SMAPAnimateCloud : MonoBehaviour
         curvePositionY = new AnimationCurve(keyPositionY);
         curvePositionZ = new AnimationCurve(keyPositionZ);
 
-        //Initialize Object Position
-        curveRotationW.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.w));
-        curveRotationX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.x));
-        curveRotationY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.y));
-        curveRotationZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.z));
+        if(isRectTransform)
+        {
+            UItransform = this.gameObject.GetComponent<RectTransform>();
+            curveHeight = new AnimationCurve(keyHeight);
+            curveWidth = new AnimationCurve(keyWidth);
 
-        curveScaleX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.x));
-        curveScaleY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.y));
-        curveScaleZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.z));
+            //Initialize UI Size
+            curveHeight.MoveKey(0,new Keyframe(0, UItransform.rect.height));
+            curveWidth.MoveKey(0,new Keyframe(0, UItransform.rect.width));
 
-        curvePositionX.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.x));
-        curvePositionY.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.y));
-        curvePositionZ.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.z));
+        }
+        else
+        {
+
+            //Initialize Object Position
+            curveRotationW.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.w));
+            curveRotationX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.x));
+            curveRotationY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.y));
+            curveRotationZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localRotation.z));
+
+            curveScaleX.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.x));
+            curveScaleY.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.y));
+            curveScaleZ.MoveKey(0, new Keyframe(0,this.gameObject.transform.localScale.z));
+
+            curvePositionX.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.x));
+            curvePositionY.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.y));
+            curvePositionZ.MoveKey(0,new Keyframe(0, this.gameObject.transform.localPosition.z));
+
+        }
 
         UpdateAnimation(); 
 
     }
-
-    // public void InitializeAnimation()
-    // {
-    //     keysRotationW.value = transform.localRotation.w;
-    //     keysRotationW.time = 0f;
-    //     keysRotationX.value = transform.localRotation.x;
-    //     keysRotationX.time = 0f;
-    //     keysRotationY.value = transform.localRotation.y;
-    //     keysRotationY.time = 0f;
-    //     keysRotationZ.value = transform.localRotation.w;
-    //     keysRotationZ.time = 0f;   
-
-
-
-    // }
 
     
     public void AddKeyframe()
@@ -112,20 +129,38 @@ public class SMAPAnimateCloud : MonoBehaviour
         indexkey ++;
         
         animationTime = keyframeTimestep*indexkey;
-    
+
+        //FOR UI ELEMENTS
+        if(isRectTransform)
+        {
+
+
+            curveWidth.AddKey(animationTime, UItransform.rect.width);
+            curveHeight.AddKey(animationTime, UItransform.rect.height);
+
+            curvePositionX.AddKey(animationTime, UItransform.anchoredPosition.x);
+            curvePositionY.AddKey(animationTime, UItransform.anchoredPosition.y);
+
+        }
+        //FOR GAMEOBJECTS
+        else
+        {
+
+            curveRotationW.AddKey(animationTime, transform.localRotation.w);
+            curveRotationX.AddKey(animationTime, transform.localRotation.x);
+            curveRotationY.AddKey(animationTime, transform.localRotation.y);
+            curveRotationZ.AddKey(animationTime, transform.localRotation.z);
+
+            curveScaleX.AddKey(animationTime, transform.localScale.x);
+            curveScaleY.AddKey(animationTime, transform.localScale.y);
+            curveScaleZ.AddKey(animationTime, transform.localScale.z);
+
+            curvePositionX.AddKey(animationTime, transform.localPosition.x);
+            curvePositionY.AddKey(animationTime, transform.localPosition.y);
+            curvePositionZ.AddKey(animationTime, transform.localPosition.z);
+
+        }
         
-        curveRotationW.AddKey(animationTime, transform.localRotation.w);
-        curveRotationX.AddKey(animationTime, transform.localRotation.x);
-        curveRotationY.AddKey(animationTime, transform.localRotation.y);
-        curveRotationZ.AddKey(animationTime, transform.localRotation.z);
-
-        curveScaleX.AddKey(animationTime, transform.localScale.x);
-        curveScaleY.AddKey(animationTime, transform.localScale.y);
-        curveScaleZ.AddKey(animationTime, transform.localScale.z);
-
-        curvePositionX.AddKey(animationTime, transform.localPosition.x);
-        curvePositionY.AddKey(animationTime, transform.localPosition.y);
-        curvePositionZ.AddKey(animationTime, transform.localPosition.z);
 
 
         UpdateAnimation(); 
@@ -164,28 +199,48 @@ public class SMAPAnimateCloud : MonoBehaviour
     {
         animationTime = keyframeTimestep * (float)index;
 
-        Keyframe TMPkeyRotationW = new Keyframe(animationTime, transform.localRotation.w);
-        curveRotationW.MoveKey(index, TMPkeyRotationW);
-        Keyframe TMPkeyRotationX = new Keyframe(animationTime, transform.localRotation.x);
-        curveRotationX.MoveKey(index, TMPkeyRotationX);
-        Keyframe TMPkeyRotationY = new Keyframe(animationTime, transform.localRotation.y);
-        curveRotationY.MoveKey(index, TMPkeyRotationY);
-        Keyframe TMPkeyRotationZ = new Keyframe(animationTime, transform.localRotation.z);
-        curveRotationZ.MoveKey(index, TMPkeyRotationZ);
+        //For UI ELEMENTS
+        if(isRectTransform)
+        {
 
-        Keyframe TMPkeyScaleX = new Keyframe(animationTime,transform.localScale.x);
-        curveScaleX.MoveKey(index, TMPkeyScaleX);
-        Keyframe TMPkeyScaleY = new Keyframe(animationTime,transform.localScale.y);
-        curveScaleY.MoveKey(index, TMPkeyScaleY);
-        Keyframe TMPkeyScaleZ = new Keyframe(animationTime,transform.localScale.z);
-        curveScaleZ.MoveKey(index, TMPkeyScaleZ);
+            Keyframe TMPkeyHeight = new Keyframe(animationTime, UItransform.rect.height);
+            curveHeight.MoveKey(index, TMPkeyHeight);
+            Keyframe TMPkeyWidth = new Keyframe(animationTime, UItransform.rect.width);
+            curveWidth.MoveKey(index, TMPkeyWidth);
 
-        Keyframe TMPkeyPositionX = new Keyframe(animationTime, transform.localPosition.x);
-        curvePositionX.MoveKey(index, TMPkeyPositionX);
-        Keyframe TMPkeyPositionY = new Keyframe(animationTime, transform.localPosition.y);
-        curvePositionY.MoveKey(index, TMPkeyPositionY);
-        Keyframe TMPkeyPositionZ = new Keyframe(animationTime, transform.localPosition.z);
-        curvePositionZ.MoveKey(index, TMPkeyPositionZ);
+            Keyframe TMPkeyPositionX = new Keyframe(animationTime, UItransform.anchoredPosition.x);
+            curvePositionX.MoveKey(index, TMPkeyPositionX);
+            Keyframe TMPkeyPositionY = new Keyframe(animationTime, UItransform.anchoredPosition.y);
+            curvePositionY.MoveKey(index, TMPkeyPositionY);
+        }
+
+        //FOR GAMEOBJECTS
+        else
+        {
+            Keyframe TMPkeyRotationW = new Keyframe(animationTime, transform.localRotation.w);
+            curveRotationW.MoveKey(index, TMPkeyRotationW);
+            Keyframe TMPkeyRotationX = new Keyframe(animationTime, transform.localRotation.x);
+            curveRotationX.MoveKey(index, TMPkeyRotationX);
+            Keyframe TMPkeyRotationY = new Keyframe(animationTime, transform.localRotation.y);
+            curveRotationY.MoveKey(index, TMPkeyRotationY);
+            Keyframe TMPkeyRotationZ = new Keyframe(animationTime, transform.localRotation.z);
+            curveRotationZ.MoveKey(index, TMPkeyRotationZ);
+
+            Keyframe TMPkeyScaleX = new Keyframe(animationTime,transform.localScale.x);
+            curveScaleX.MoveKey(index, TMPkeyScaleX);
+            Keyframe TMPkeyScaleY = new Keyframe(animationTime,transform.localScale.y);
+            curveScaleY.MoveKey(index, TMPkeyScaleY);
+            Keyframe TMPkeyScaleZ = new Keyframe(animationTime,transform.localScale.z);
+            curveScaleZ.MoveKey(index, TMPkeyScaleZ);
+
+            Keyframe TMPkeyPositionX = new Keyframe(animationTime, transform.localPosition.x);
+            curvePositionX.MoveKey(index, TMPkeyPositionX);
+            Keyframe TMPkeyPositionY = new Keyframe(animationTime, transform.localPosition.y);
+            curvePositionY.MoveKey(index, TMPkeyPositionY);
+            Keyframe TMPkeyPositionZ = new Keyframe(animationTime, transform.localPosition.z);
+            curvePositionZ.MoveKey(index, TMPkeyPositionZ);
+        }
+
 
         UpdateAnimation();
 
@@ -195,18 +250,33 @@ public class SMAPAnimateCloud : MonoBehaviour
 
     public void UpdateAnimation()
     {
-        clip.SetCurve("",typeof(Transform),"localRotation.w",curveRotationW);
-        clip.SetCurve("",typeof(Transform),"localRotation.x",curveRotationX);
-        clip.SetCurve("",typeof(Transform),"localRotation.y",curveRotationY);
-        clip.SetCurve("",typeof(Transform),"localRotation.z",curveRotationZ);
+        //FOR UI ELEMENTS
+        if(isRectTransform)
+        {
+            clip.SetCurve("",typeof(RectTransform),"m_SizeDelta.x",curveWidth);
+            clip.SetCurve("",typeof(RectTransform),"m_SizeDelta.y",curveHeight);
+            
+            clip.SetCurve("",typeof(RectTransform),"m_AnchoredPosition.x",curvePositionX);
+            clip.SetCurve("",typeof(RectTransform),"m_AnchoredPosition.y",curvePositionY);
+        }
+        //FOR GAMEOBJECTS
+        else
+        {
+            clip.SetCurve("",typeof(Transform),"localRotation.w",curveRotationW);
+            clip.SetCurve("",typeof(Transform),"localRotation.x",curveRotationX);
+            clip.SetCurve("",typeof(Transform),"localRotation.y",curveRotationY);
+            clip.SetCurve("",typeof(Transform),"localRotation.z",curveRotationZ);
 
-        clip.SetCurve("",typeof(Transform),"localScale.x",curveScaleX);
-        clip.SetCurve("",typeof(Transform),"localScale.y",curveScaleY);
-        clip.SetCurve("",typeof(Transform),"localScale.z",curveScaleZ);
+            clip.SetCurve("",typeof(Transform),"localScale.x",curveScaleX);
+            clip.SetCurve("",typeof(Transform),"localScale.y",curveScaleY);
+            clip.SetCurve("",typeof(Transform),"localScale.z",curveScaleZ);
 
-        clip.SetCurve("",typeof(Transform),"localPosition.x",curvePositionX);
-        clip.SetCurve("",typeof(Transform),"localPosition.y",curvePositionY);
-        clip.SetCurve("",typeof(Transform),"localPosition.z",curvePositionZ);
+            clip.SetCurve("",typeof(Transform),"localPosition.x",curvePositionX);
+            clip.SetCurve("",typeof(Transform),"localPosition.y",curvePositionY);
+            clip.SetCurve("",typeof(Transform),"localPosition.z",curvePositionZ);
+
+        }
+
 
         anim.AddClip(clip,clip.name);
         anim.clip = clip;   
@@ -239,18 +309,30 @@ public class SMAPAnimateCloud : MonoBehaviour
     //HERE IF YOU WANT TO REMOVE NEW VARIABLES
     public void RemoveCurves(int i)
     {
-        curveRotationW.RemoveKey(i);
-        curveRotationX.RemoveKey(i);
-        curveRotationY.RemoveKey(i);
-        curveRotationZ.RemoveKey(i);
-        
-        curveScaleX.RemoveKey(i);
-        curveScaleY.RemoveKey(i);
-        curveScaleZ.RemoveKey(i);
-        
-        curvePositionX.RemoveKey(i);
-        curvePositionY.RemoveKey(i);
-        curvePositionZ.RemoveKey(i);
+        //FOR UI ELEMENTS
+        if(isRectTransform)
+        {
+            curveHeight.RemoveKey(i);
+            curveWidth.RemoveKey(i);
+            curvePositionX.RemoveKey(i);
+            curvePositionY.RemoveKey(i);
+        }
+        //FOR GAMEOBJECTS
+        else
+        {
+            curveRotationW.RemoveKey(i);
+            curveRotationX.RemoveKey(i);
+            curveRotationY.RemoveKey(i);
+            curveRotationZ.RemoveKey(i);
+            
+            curveScaleX.RemoveKey(i);
+            curveScaleY.RemoveKey(i);
+            curveScaleZ.RemoveKey(i);
+            
+            curvePositionX.RemoveKey(i);
+            curvePositionY.RemoveKey(i);
+            curvePositionZ.RemoveKey(i);
+        }
 
     }
 
@@ -268,19 +350,32 @@ public class SMAPAnimateCloud : MonoBehaviour
             key_to_shift = 1;
         }
 
+        //FOR UI ELEMENTS
+        if(isRectTransform)
+        {
+            curveHeight.MoveKey(index, curveHeight.keys[key_to_shift]);
+            curveWidth.MoveKey(index, curveWidth.keys[key_to_shift]);
 
-        curveRotationW.MoveKey(index, curveRotationW.keys[key_to_shift]);
-        curveRotationX.MoveKey(index, curveRotationX.keys[key_to_shift]);
-        curveRotationY.MoveKey(index, curveRotationY.keys[key_to_shift]);
-        curveRotationZ.MoveKey(index, curveRotationZ.keys[key_to_shift]);
+            curvePositionX.MoveKey(index, curvePositionX.keys[key_to_shift]);
+            curvePositionY.MoveKey(index, curvePositionY.keys[key_to_shift]);
+        }
+        //FOR GAMEOBJECTS
+        else
+        {
+            curveRotationW.MoveKey(index, curveRotationW.keys[key_to_shift]);
+            curveRotationX.MoveKey(index, curveRotationX.keys[key_to_shift]);
+            curveRotationY.MoveKey(index, curveRotationY.keys[key_to_shift]);
+            curveRotationZ.MoveKey(index, curveRotationZ.keys[key_to_shift]);
 
-        curveScaleX.MoveKey(index, curveScaleX.keys[key_to_shift]);
-        curveScaleY.MoveKey(index, curveScaleY.keys[key_to_shift]);
-        curveScaleZ.MoveKey(index, curveScaleZ.keys[key_to_shift]);
+            curveScaleX.MoveKey(index, curveScaleX.keys[key_to_shift]);
+            curveScaleY.MoveKey(index, curveScaleY.keys[key_to_shift]);
+            curveScaleZ.MoveKey(index, curveScaleZ.keys[key_to_shift]);
 
-        curvePositionX.MoveKey(index, curvePositionX.keys[key_to_shift]);
-        curvePositionY.MoveKey(index, curvePositionY.keys[key_to_shift]);
-        curvePositionZ.MoveKey(index, curvePositionZ.keys[key_to_shift]);
+            curvePositionX.MoveKey(index, curvePositionX.keys[key_to_shift]);
+            curvePositionY.MoveKey(index, curvePositionY.keys[key_to_shift]);
+            curvePositionZ.MoveKey(index, curvePositionZ.keys[key_to_shift]);
+
+        }
 
     }
 

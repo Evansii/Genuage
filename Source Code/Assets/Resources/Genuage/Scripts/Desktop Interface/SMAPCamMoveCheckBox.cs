@@ -14,13 +14,20 @@ public class SMAPCamMoveCheckBox : MonoBehaviour
 
     public Toggle moveToggle;
 
+    public Text helpText_1;
+    public Text helpText_2;
+    public Text helpText_3;
+
     // Start is called before the first frame update
     void Start()
     {
         camera = GameObject.FindWithTag("MainCamera");
 
         camMoveScript = camera.GetComponent<SMAPCameraMovement>();
-        camMoveScript.enabled = false;
+
+        helpText_1.enabled = false;
+        helpText_2.enabled = false;
+        helpText_3.enabled = false;
 
         dragScript = camera.GetComponent<DragMouseOrbit>();
 
@@ -33,11 +40,19 @@ public class SMAPCamMoveCheckBox : MonoBehaviour
         {
             camMoveScript.enabled = true;
             dragScript.enabled = false;
+
+            helpText_1.enabled = true;
+            helpText_2.enabled = true;
+            helpText_3.enabled = true;
         }
         else
         {
             camMoveScript.enabled = false;
             dragScript.enabled = true;
+
+            helpText_1.enabled = false;
+            helpText_2.enabled = false;
+            helpText_3.enabled = false;
         }
     }
 

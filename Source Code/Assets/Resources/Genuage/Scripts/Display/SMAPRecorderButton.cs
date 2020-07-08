@@ -35,11 +35,19 @@ namespace DesktopInterface
 
         SMAPAnimateCloud cameraAnim;
 
+        public SMAPAnimateCloud clipAnim;
+
+        public SMAPAnimateCloud clipZAnim;
+
         GameObject camera;
 
         GameObject cloudpoint;
 
         GameObject cloudpointShadow;
+
+        public ClippingPlaneDesktop clipPlaneXY;   
+        public ClippingPlaneZDesktop clipPlaneZ;
+        public GameObjectActivationButton clipScript;
         public Texture shadowTex;
 
         ScreenRecorder recorder;
@@ -73,7 +81,6 @@ namespace DesktopInterface
         public List<GameObject> shadowsList = new List<GameObject>();
 
         public string previousColorMap;
-
 
 
 
@@ -124,6 +131,7 @@ namespace DesktopInterface
 
         public override void Execute() 
         {
+            clipScript.Execute();
             cloudpoint = GameObject.FindWithTag("PointCloud");
             cloudAnim = cloudpoint.GetComponent<SMAPAnimateCloud>();
             cameraAnim = camera.GetComponent<SMAPAnimateCloud>();
@@ -158,6 +166,8 @@ namespace DesktopInterface
             UpdateFrameNumber();
             cloudAnim.PlayAnimation();
             cameraAnim.PlayAnimation();
+            clipAnim.PlayAnimation();
+            clipZAnim.PlayAnimation();
             Record();
         }
 
@@ -300,6 +310,8 @@ namespace DesktopInterface
         {
             cloudAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
             cameraAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
+            clipAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
+            clipZAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
             UpdateShadowPosition();
 
         }
@@ -309,6 +321,9 @@ namespace DesktopInterface
         {
             cloudAnim.PlayAnimation();
             cameraAnim.PlayAnimation();
+            clipAnim.PlayAnimation();
+            clipZAnim.PlayAnimation();
+            
         }
 
 
@@ -317,6 +332,8 @@ namespace DesktopInterface
             //Remove Keyframe
             cloudAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
             cameraAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
+            clipAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
+            clipZAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
 
             keyframeList.RemoveAt(keyframeManagerDropdown.value);
 
@@ -354,12 +371,15 @@ namespace DesktopInterface
         }
 
         public void SaveKeyframe()
-        { 
-
+        {
+            //cloudAnim.thresholdXYList = clipPlaneXY.SaveThresholdingToKeyframe(cloudAnim.thresholdXYList);
+            
             string currentColorMap = cloudpoint.GetComponent<CloudData>().globalMetaData.colormapName;
             
             cloudAnim.AddKeyframe();
             cameraAnim.AddKeyframe();
+            clipAnim.AddKeyframe();
+            clipZAnim.AddKeyframe();
             if(!isAnimated)
                 isAnimated = true;
 

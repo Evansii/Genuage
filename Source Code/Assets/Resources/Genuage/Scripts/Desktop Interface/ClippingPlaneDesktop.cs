@@ -37,15 +37,13 @@ public class ClippingPlaneDesktop : MonoBehaviour
 
 
 
+
     // Start is called before the first frame update
     void OnEnable()
     {
         data = CloudUpdater.instance.LoadCurrentStatus();
 
         background = this.gameObject.transform.parent.gameObject;
-
-        //topRightAnchor = this.gameObject.transform.GetChild(0).gameObject;
-        //botLeftAnchor = this.gameObject.transform.GetChild(3).gameObject; 
 
 
         backBounds = background.GetComponent<BoxCollider2D>().bounds;
@@ -96,9 +94,9 @@ public class ClippingPlaneDesktop : MonoBehaviour
     public void ClipData()
     {
         xMinBound = botLeftAnchor.transform.position.x;
-        xMaxBound =  topRightAnchor.transform.position.x;
-        yMinBound =  botLeftAnchor.transform.position.y;
-        yMaxBound =  topRightAnchor.transform.position.y;
+        xMaxBound = topRightAnchor.transform.position.x;
+        yMinBound = botLeftAnchor.transform.position.y;
+        yMaxBound = topRightAnchor.transform.position.y;
 
         
         data.globalMetaData.xMinThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax,((xMinBound - xMinBack)/(xMaxBack - xMinBack)));
@@ -110,4 +108,19 @@ public class ClippingPlaneDesktop : MonoBehaviour
         
 
     }
+
+    // public List<Vector2[]> SaveThresholdingToKeyframe(List<Vector2[]> threList)
+    // {
+    //     Vector2[] thre_entry = new Vector2[2];
+    //     thre_entry[0].x = data.globalMetaData.xMinThreshold;
+    //     thre_entry[0].y = data.globalMetaData.xMaxThreshold;
+
+    //     thre_entry[1].x = data.globalMetaData.yMinThreshold;
+    //     thre_entry[1].y = data.globalMetaData.yMaxThreshold;
+
+    //     threList.Add(thre_entry);
+
+    //     return threList;
+    // }
+
 }
