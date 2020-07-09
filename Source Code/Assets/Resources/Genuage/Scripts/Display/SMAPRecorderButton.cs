@@ -45,8 +45,11 @@ namespace DesktopInterface
 
         GameObject cloudpointShadow;
 
-        public ClippingPlaneDesktop clipPlaneXY;   
-        public ClippingPlaneZDesktop clipPlaneZ;
+        GameObject boxobject;
+
+
+        public GameObject clipPlaneXY;   
+        public GameObject clipPlaneZ;
         public GameObjectActivationButton clipScript;
         public Texture shadowTex;
 
@@ -82,12 +85,25 @@ namespace DesktopInterface
 
         public string previousColorMap;
 
+        public List<Vector3[]> transfoList;
+
+        public List<Vector2[]> clipXYList;
+
+        public List<Vector2[]> clipZList;
+        
+
+        
+
 
 
 
         private void Awake()
         {
             keyframeList = new List<string>();
+
+            transfoList = new List<Vector3[]>();
+            clipXYList = new List<Vector2[]>();
+            clipZList = new List<Vector2[]>();
 
             button = GetComponent<Button>();
 
@@ -118,8 +134,11 @@ namespace DesktopInterface
             //Keyframe Manager
             deleteKeyButton.onClick.AddListener(DeleteKeyframe);
             updateKeyButton.onClick.AddListener(UpdateKeyframe);
-            keyframeManagerDropdown.onValueChanged.AddListener(HideKeyframeShadows);
-            hideShadowToggle.onValueChanged.AddListener(UpdateHiddenShadows);
+            keyframeManagerDropdown.onValueChanged.AddListener(UpdateTransformToKeyframe);
+            keyframeManagerDropdown.onValueChanged.AddListener(UpdateClippingPlaneToKeyframe);
+            
+            //keyframeManagerDropdown.onValueChanged.AddListener(HideKeyframeShadows);
+            //hideShadowToggle.onValueChanged.AddListener(UpdateHiddenShadows);
 
 
 
@@ -136,16 +155,18 @@ namespace DesktopInterface
             cloudAnim = cloudpoint.GetComponent<SMAPAnimateCloud>();
             cameraAnim = camera.GetComponent<SMAPAnimateCloud>();
             data = CloudUpdater.instance.LoadCurrentStatus(); 
+            boxobject =  GameObject.Find("Box");
             box = GameObject.Find("Box").GetComponent<MeshRenderer>();
             box.enabled = true;
+
       
         }
 
         public void Record()
         {
             HideBox();
-            hiddenShadows = true;
-            HideKeyframeShadows(0);
+            //hiddenShadows = true;
+            //HideKeyframeShadows(0);
             // if(isAnimated)
             // {
             //     recordTime = cloudAnim.animationTime + 1f;
@@ -163,6 +184,7 @@ namespace DesktopInterface
         public void RecordAnimation()
         {
             recordTime = cloudAnim.animationTime + 1f;
+            //recordTime += 1f;
             UpdateFrameNumber();
             cloudAnim.PlayAnimation();
             cameraAnim.PlayAnimation();
@@ -177,77 +199,128 @@ namespace DesktopInterface
             box.enabled = false;
         }
 
-        public void CreateKeyframeShadow()
-        {
-            cloudpointShadow = GameObject.Instantiate(cloudpoint);
-            cloudpointShadow.name ="Keyframe Shadow " + keyframeManagerDropdown.options.Count;
-            cloudpointShadow.tag = "Shadow";
-            cloudpointShadow.GetComponent<MeshRenderer>().material.SetTexture("_ColorTex", shadowTex);
-            Destroy(cloudpointShadow.GetComponent<CloudData>());
-            Destroy(cloudpointShadow.GetComponent<CloudBox>());
-            Destroy(cloudpointShadow.GetComponent<SMAPAnimateCloud>());
-            Destroy(cloudpointShadow.GetComponent<VRTK_InteractableObject>());
-            //Destroy(cloudpointShadow.GetComponent<VRTK_ChildOfControllerGrabAttach>());
-            Destroy(cloudpointShadow.GetComponent<VRTK_RigidbodyFollow>());
-            Destroy(cloudpointShadow.GetComponent<Rigidbody>());
-            Destroy(cloudpointShadow.GetComponent<Animation>());
+        //LEGACY OLD SHADOW SYSTEM
+        // public void CreateKeyframeShadow()
+        // {
+        //     cloudpointShadow = GameObject.Instantiate(cloudpoint);
+        //     cloudpointShadow.name ="Keyframe Shadow " + keyframeManagerDropdown.options.Count;
+        //     cloudpointShadow.tag = "Shadow";
+        //     cloudpointShadow.GetComponent<MeshRenderer>().material.SetTexture("_ColorTex", shadowTex);
+        //     Destroy(cloudpointShadow.GetComponent<CloudData>());
+        //     Destroy(cloudpointShadow.GetComponent<CloudBox>());
+        //     Destroy(cloudpointShadow.GetComponent<SMAPAnimateCloud>());
+        //     Destroy(cloudpointShadow.GetComponent<VRTK_InteractableObject>());
+        //     //Destroy(cloudpointShadow.GetComponent<VRTK_ChildOfControllerGrabAttach>());
+        //     Destroy(cloudpointShadow.GetComponent<VRTK_RigidbodyFollow>());
+        //     Destroy(cloudpointShadow.GetComponent<Rigidbody>());
+        //     Destroy(cloudpointShadow.GetComponent<Animation>());
 
-            shadowsList.Add(cloudpointShadow);
+        //     shadowsList.Add(cloudpointShadow);
             
-            if(hiddenShadows)
-            {
-                cloudpointShadow.SetActive(false);
-            }           
-        }
+        //     if(hiddenShadows)
+        //     {
+        //         cloudpointShadow.SetActive(false);
+        //     }           
+        // }
 
 
-        public void HideKeyframeShadows(int id)
+        public void SaveTransformToList()
         {
-            //GameObject[] shadows = GameObject.FindGameObjectsWithTag("Shadow");
-            Debug.Log("Keyframe Shadow "+ (keyframeManagerDropdown.value+1));
-            foreach(GameObject shad in shadowsList)
-            {
-                if(hiddenShadows)
-                {
-                    shad.SetActive(false);
-                }
-                else
-                {
-                    if(shad.name != "Keyframe Shadow "+ (keyframeManagerDropdown.value+1))
-                    {
-                        //shad.GetComponent<MeshRenderer>().enabled = false;
-                        shad.SetActive(false);
-
-                    }
-                    else
-                    {
-                        shad.SetActive(true);
-                    }
-                }
-            }
-            hiddenShadows = false;
+            Vector3[] transToSave = new Vector3[3];
+            transToSave[0] = cloudpoint.transform.position;
+            transToSave[1] = cloudpoint.transform.localScale;
+            transToSave[2] = cloudpoint.transform.localEulerAngles;
+            transfoList.Add(transToSave);
+    
         }
 
-        public void UpdateHiddenShadows(bool select)
+        public void SaveClippingToList(GameObject clipPlane ,List<Vector2[]> clipList)
         {
-            if(hideShadowToggle.isOn)
-            {
-                hiddenShadows = true;
-            }
-            else
-            {
-                hiddenShadows = false;
-            }
-            HideKeyframeShadows(0);
+            Vector2[] clipToSave = new Vector2[2];
+            RectTransform clipTransfo = clipPlane.GetComponent<RectTransform>();
+
+            clipToSave[0] = clipTransfo.anchoredPosition;
+            clipToSave[1] = clipTransfo.sizeDelta;
+
+            clipList.Add(clipToSave);
         }
 
-        public void UpdateShadowPosition()
+
+        //LEGACY OLD SHADOW SYSTEM
+        // public void HideKeyframeShadows(int id)
+        // {
+        //     GameObject[] shadows = GameObject.FindGameObjectsWithTag("Shadow");
+        //     foreach(GameObject shad in shadowsList)
+        //     {
+        //         if(hiddenShadows)
+        //         {
+        //             shad.SetActive(false);
+        //         }
+        //         else
+        //         {
+        //             if(shad.name != "Keyframe Shadow "+ (keyframeManagerDropdown.value+1))
+        //             {
+        //                 shad.GetComponent<MeshRenderer>().enabled = false;
+        //                 shad.SetActive(false);
+
+        //             }
+        //             else
+        //             {
+        //                 shad.SetActive(true);
+        //             }
+        //         }
+        //     }
+        //     hiddenShadows = false;
+        // }
+
+        public void UpdateTransformToKeyframe(int id)
         {
-            GameObject currentShadow = GameObject.Find("Keyframe Shadow "+ (keyframeManagerDropdown.value+1));
-            currentShadow.transform.localPosition = cloudpoint.transform.localPosition;
-            currentShadow.transform.localEulerAngles = cloudpoint.transform.localEulerAngles;
-            currentShadow.transform.localScale = cloudpoint.transform.localScale;
+            boxobject.transform.position = transfoList[id][0];
+            boxobject.transform.localEulerAngles = transfoList[id][2];
+
+
+            cloudpoint.transform.position = transfoList[id][0];
+            cloudpoint.transform.localScale = transfoList[id][1];
+            cloudpoint.transform.localEulerAngles = transfoList[id][2];
+
+            
         }
+        
+        public void UpdateClippingPlaneToKeyframe(int id)
+        {
+            //Update Clipping Plane XY
+            RectTransform clipTransfo = clipPlaneXY.GetComponent<RectTransform>();
+            clipTransfo.anchoredPosition = clipXYList[id][0];
+            clipTransfo.sizeDelta = clipXYList[id][1];
+
+            //Update Clipping Plane Z
+            clipTransfo =  clipPlaneZ.GetComponent<RectTransform>();
+            clipTransfo.anchoredPosition = clipZList[id][0];
+            clipTransfo.sizeDelta = clipZList[id][1];
+        }
+
+        //LEGACY OLD SHADOW SYSTEM
+        // public void UpdateHiddenShadows(bool select)
+        // {
+        //     if(hideShadowToggle.isOn)
+        //     {
+        //         hiddenShadows = true;
+        //     }
+        //     else
+        //     {
+        //         hiddenShadows = false;
+        //     }
+        //     HideKeyframeShadows(0);
+        // }
+
+        //LEGACY OLD SHADOW SYSTEM
+        // public void UpdateShadowPosition()
+        // {
+        //     GameObject currentShadow = GameObject.Find("Keyframe Shadow "+ (keyframeManagerDropdown.value+1));
+        //     currentShadow.transform.localPosition = cloudpoint.transform.localPosition;
+        //     currentShadow.transform.localEulerAngles = cloudpoint.transform.localEulerAngles;
+        //     currentShadow.transform.localScale = cloudpoint.transform.localScale;
+        // }
     
 
         public void UpdateFrameRate(int id)
@@ -301,6 +374,9 @@ namespace DesktopInterface
             if (Single.TryParse(animSpeedDropdown.options[id].text, out float speed))
             {
                 cloudAnim.SetAnimationSpeed(speed);
+                cameraAnim.SetAnimationSpeed(speed);
+                clipAnim.SetAnimationSpeed(speed);
+                clipZAnim.SetAnimationSpeed(speed);
             }
             else
                 Debug.Log("Animation Speed could not be parsed");
@@ -312,9 +388,37 @@ namespace DesktopInterface
             cameraAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
             clipAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
             clipZAnim.UpdateKeyframe(keyframeManagerDropdown.value+1);
-            UpdateShadowPosition();
+            
+            UpdateTransfoPosition(keyframeManagerDropdown.value);
+            UpdateClippingPlanePosition(keyframeManagerDropdown.value);
+            
+            //LEGACY(not compatible with ClippingPlane)
+            //UpdateShadowPosition();
+
 
         }
+
+        public void UpdateTransfoPosition(int id)
+        {
+            transfoList[id][0] = cloudpoint.transform.position;
+            transfoList[id][1] = cloudpoint.transform.localScale;
+            transfoList[id][2] = cloudpoint.transform.localEulerAngles;
+        }
+
+        public void UpdateClippingPlanePosition(int id)
+        {
+           //Update Clipping Plane XY
+            RectTransform clipTransfo = clipPlaneXY.GetComponent<RectTransform>();
+            clipXYList[id][0] = clipTransfo.anchoredPosition;
+            clipXYList[id][1] = clipTransfo.sizeDelta;
+
+            //Update Clipping Plane Z
+            clipTransfo =  clipPlaneZ.GetComponent<RectTransform>();
+            clipXYList[id][0] = clipTransfo.anchoredPosition;
+            clipZList[id][1] = clipTransfo.sizeDelta;
+        }   
+    
+
 
 
         public void PreviewAnimation()
@@ -329,6 +433,9 @@ namespace DesktopInterface
 
         public void DeleteKeyframe()
         {
+            //Single.TryParse(framerateDropdown.options[framerateDropdown.value].text, out float j);
+            //recordTime -= j;
+
             //Remove Keyframe
             cloudAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
             cameraAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
@@ -336,6 +443,10 @@ namespace DesktopInterface
             clipZAnim.RemoveKeyframe(keyframeManagerDropdown.value+1);
 
             keyframeList.RemoveAt(keyframeManagerDropdown.value);
+
+            transfoList.RemoveAt(keyframeManagerDropdown.value);
+            clipXYList.RemoveAt(keyframeManagerDropdown.value);
+            clipZList.RemoveAt(keyframeManagerDropdown.value);
 
             if(keyframeManagerDropdown.value != keyframeList.Count)
             {
@@ -348,14 +459,14 @@ namespace DesktopInterface
 
             keyframeCount--;
 
-            //Remove Keyframe Shadow
-            Destroy(shadowsList[keyframeManagerDropdown.value]);
-            shadowsList.RemoveAt(keyframeManagerDropdown.value);
+            //Remove Keyframe Shadow (LEGACY)
+            // Destroy(shadowsList[keyframeManagerDropdown.value]);
+            // shadowsList.RemoveAt(keyframeManagerDropdown.value);
 
-            for(int j = 0; j < shadowsList.Count;j++)
-            {
-                shadowsList[j].name ="Keyframe Shadow "+(j+1);
-            }
+            // for(int j = 0; j < shadowsList.Count;j++)
+            // {
+            //     shadowsList[j].name ="Keyframe Shadow "+(j+1);
+            // }
 
             UpdateKeyframeManager();
 
@@ -372,8 +483,8 @@ namespace DesktopInterface
 
         public void SaveKeyframe()
         {
-            //cloudAnim.thresholdXYList = clipPlaneXY.SaveThresholdingToKeyframe(cloudAnim.thresholdXYList);
-            
+            //Single.TryParse(framerateDropdown.options[framerateDropdown.value].text, out float j);
+            //recordTime += j;
             string currentColorMap = cloudpoint.GetComponent<CloudData>().globalMetaData.colormapName;
             
             cloudAnim.AddKeyframe();
@@ -388,13 +499,18 @@ namespace DesktopInterface
                 Debug.Log("Event added");
                 cloudAnim.AddAnimationEvent("ColorMap", currentColorMap);
             }
+            
+            SaveTransformToList();
+
+            SaveClippingToList(clipPlaneXY, clipXYList);
+            SaveClippingToList(clipPlaneZ, clipZList);
 
             keyframeCount++;
             keyframeList.Add(keyframeCount.ToString());
             UpdateKeyframeManager();
 
-            CreateKeyframeShadow();
-
+            //LEGACY (not compatible with Clipping Plane)
+            //CreateKeyframeShadow();
             previousColorMap = currentColorMap;
             
 
