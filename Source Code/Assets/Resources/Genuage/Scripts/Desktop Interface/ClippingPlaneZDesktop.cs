@@ -88,8 +88,8 @@ public class ClippingPlaneZDesktop : MonoBehaviour
         zMaxBound =  botAnchor.transform.position.y;
 
         
-        data.globalMetaData.zMinThreshold = Mathf.Lerp(data.globalMetaData.zMin, data.globalMetaData.zMax,((zMinBound - zMinBack)/(zMaxBack - zMinBack)));
-        data.globalMetaData.zMaxThreshold = Mathf.Lerp(data.globalMetaData.zMin, data.globalMetaData.zMax, ((zMaxBound - zMinBack)/(zMaxBack - zMinBack)));
+        data.globalMetaData.columnMetaDataList[2].MinThreshold = Mathf.Lerp(data.globalMetaData.zMin, data.globalMetaData.zMax,((zMinBound - zMinBack)/(zMaxBack - zMinBack)));
+        data.globalMetaData.columnMetaDataList[2].MaxThreshold  = Mathf.Lerp(data.globalMetaData.zMin, data.globalMetaData.zMax, ((zMaxBound - zMinBack)/(zMaxBack - zMinBack)));
         
         CloudUpdater.instance.ChangeThreshold();
         

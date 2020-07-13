@@ -1,4 +1,4 @@
-﻿/*/**
+﻿/**
 Copyright (c) 2020, 	Institut Curie, Institut Pasteur and CNRS
 			Thomas BLanc, Mohamed El Beheiry, Jean Baptiste Masson, Bassam Hajj and Clement caporal
 All rights reserved.
@@ -295,7 +295,7 @@ namespace Data
             
             
             OnColorMapChange(newMapName);
-            Debug.Log("eventcheck");
+            //Debug.Log("eventcheck");
             currentCloud.globalMetaData.colormapName = newMapName;
             
             /**
@@ -417,8 +417,8 @@ namespace Data
 
         public delegate void OnColorMapSaturationChangeEvent(float value1, float value2);
         public event OnColorMapSaturationChangeEvent OnColorMapSaturationChange;
-        
-        /**
+
+        //New Version
         public override void ChangeColorMapSaturation(float value1, float value2, string id)
         {
 
@@ -426,7 +426,6 @@ namespace Data
             ColorMap ColorMap = ColorMapManager.instance.GetColorMap(currentCloud.globalMetaData.colormapName);
             Texture2D texture = ColorMap.texture;
             //Color[] colormapArray = texture.GetPixels();
-            Mesh mesh = currentCloud.gameObject.GetComponent<MeshFilter>().mesh;
 
             float delta = 1.0f;
 
@@ -435,8 +434,6 @@ namespace Data
             Texture2D newtexture = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
             newtexture.wrapMode = TextureWrapMode.Clamp;
             Color[] colormapArray = newtexture.GetPixels();
-
-
 
             float cmin = 0.0f;
             float cmax = 1.0f;
@@ -453,40 +450,40 @@ namespace Data
                     cmax = value1;
                     break;
                 default:
-                    Debug.Log("colormap error");
+                    Debug.Log("colormap saturation error");
                     break;
             }
-
-            int spacing = (int)(256 / (ColorMap.colorArray.Length - 1)) ;
-
-            float spaceleft = (cmax * 255f) - (cmin * 255f);
-            int spacingspaceleft = (int)(spaceleft / (ColorMap.colorArray.Length - 1));
-
-            for (int i = 0; i < texture.width; i++)
+            delta = Mathf.Abs(cmax - cmin);
+            if(delta == 0)
             {
-                int j = Mathf.Min(i / spacingspaceleft, ColorMap.colorArray.Length - 2);
+                delta = 0.00000000001f;
+            }
+            int spacing = (int)(256/ (ColorMap.colorArray.Length));
+            int deltaspacing = (int)(delta*256 / (ColorMap.colorArray.Length));
 
-                if (i < (int)(cmin * 255f))
-                {
-                    newtexture.SetPixel(i, 0, ColorMap.colorArray[0]);
-                }
-                else
-                {
-                    newtexture.SetPixel(i, 0, Color.Lerp(ColorMap.colorArray[j], ColorMap.colorArray[j + 1], i - j/ spacingspaceleft));
-                    
-                    //colormap_texture.SetPixel(i, 0, Color.Lerp(colors[j], colors[j + 1], (float)(i - j * spacing) / (float)spacing));
+            for (int i = 0; i < colormapArray.Length; i++)
+            {
 
-                    //colormapArray[i] = Color.Lerp(ColorMap.colorArray[0], ColorMap.colorArray[1], (float)(i - cmin * 255f) / (255f) / delta);
-                }
-                
-                if (i > (int)(cmax * 255f))
+                if (i <= (int)(cmin * 255f))
                 {
-                    newtexture.SetPixel(i, 0, ColorMap.colorArray[ColorMap.colorArray.Length-1]);
+                    colormapArray[i] = ColorMap.colorArray[0];
+                }
+                else if (i >= (int)(cmax * 255f))
+                {
+                    colormapArray[i] = ColorMap.colorArray[ColorMap.colorArray.Length-1];//Color.Lerp(ColorMap.colorArray[0], ColorMap.colorArray[1], (float)(i - cmin * 255f) / (255f) / delta);
                 }
                 
             }
 
-            //newtexture.SetPixels(colormapArray);
+            for (int i = (int)(cmin * 255f); i < (int)(cmax * 255f); i++)
+            {
+                int j = Mathf.Min((int)(i - cmin*255f) / deltaspacing, ColorMap.colorArray.Length - 2);
+
+                colormapArray[i] = Color.Lerp(ColorMap.colorArray[j], ColorMap.colorArray[j + 1], (float)((i - (cmin * 255f) - (j * deltaspacing)) /deltaspacing / delta)); //Color.Lerp(ColorMap.colorArray[0], ColorMap.colorArray[1], (float)(i - cmin * 255f) / (255f) / delta);
+
+            }
+
+            newtexture.SetPixels(colormapArray);
             newtexture.Apply();
             ColorMap.texture = newtexture;
             OnColorMapSaturationChange(value1, value2);
@@ -498,9 +495,10 @@ namespace Data
 
 
         }
-        **/
 
-        
+        //OLD VERSION, IN CASE OF PROBLEMS
+
+        /**
         public override void ChangeColorMapSaturation(float value1, float value2, string id)
         {
 
@@ -534,7 +532,7 @@ namespace Data
                     cmax = value1;
                     break;
                 default:
-                    Debug.Log("colormap error");
+                    Debug.Log("colormap saturation error");
                     break;
             }
 
@@ -564,9 +562,13 @@ namespace Data
 
 
         }
-        
+        **/
 
-
+        public void UpdateFreezableClippingPlanes(GameObject[] goArray)
+        {
+            CloudData currcloud = LoadCurrentStatus();
+            currcloud.globalMetaData.ClippingPlanesList = goArray;
+        }
 
 
         public override void ChangePointSize(float value)
@@ -575,6 +577,7 @@ namespace Data
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Size", value / 50);
             currentCloud.globalMetaData.point_size = value;
+            Debug.Log("PointSize Changed");
         }
 
         #endregion
@@ -596,12 +599,24 @@ namespace Data
                     Debug.Log(currcloud.globalMetaData.upperframeLimit);
                     foreach (var kvp in currcloud.globalMetaData.sphereList)
                     {
+                        if (kvp.Value.activeInHierarchy)
+                        {
+                            Lists.Add(kvp.Value.transform.GetChild(0).GetComponent<PointSelectorSphere>().selectedPoints);
 
-                        Lists.Add(kvp.Value.transform.GetChild(0).GetComponent<PointSelectorSphere>().selectedPoints);
+                        }
                     }
                     foreach (var kvp in currcloud.globalMetaData.convexHullsList)
                     {
-                        Lists.Add(kvp.Value.GetComponent<PointSelectorConvexHull>().selectedPoints);
+                        if (kvp.Value.activeInHierarchy)
+                        {
+                            Lists.Add(kvp.Value.GetComponent<PointSelectorConvexHull>().selectedPoints);
+                        }
+                    }
+
+                    if (currcloud.globalMetaData.FreeSelectionON)
+                    {
+                        Lists.Add(currcloud.globalMetaData.FreeSelectionIDList);
+
                     }
 
                     if (currcloud.trajectoryObject)
@@ -622,6 +637,51 @@ namespace Data
             }
         }
 
+
+        public void ResetPointSelection()
+        {
+            CloudData currcloud = LoadCurrentStatus();
+            currcloud.globalMetaData.SelectedPointsList.Clear();
+            
+            foreach (var go in currcloud.globalMetaData.sphereList)
+            {
+                GameObject g = go.Value;
+                Destroy(g);
+            }
+            currcloud.globalMetaData.sphereList.Clear();
+            foreach (var go in currcloud.globalMetaData.convexHullsList)
+            {
+                GameObject g = go.Value;
+                Destroy(g);
+            }
+            currcloud.globalMetaData.convexHullsList.Clear();
+            currcloud.globalMetaData.FreeSelectionIDList.Clear();
+            UpdatePointSelection();
+            //TODO : Iterate over convex hull and sphere lists and delete them.
+        }
+
+        public void ResetFreeSelection()
+        {
+            //TODO : Tidy up and make a global function
+            CloudData currcloud = LoadCurrentStatus();
+            currcloud.globalMetaData.FreeSelectionIDList.Clear();
+            UpdatePointSelection();
+
+        }
+
+        public void SwitchFreeSelectionActivation()
+        {
+            CloudData currcloud = LoadCurrentStatus();
+            currcloud.globalMetaData.FreeSelectionON = !currcloud.globalMetaData.FreeSelectionON;
+            UpdatePointSelection();
+        }
+        public void ChangeFreeSelectionActivation(bool status)
+        {
+            CloudData currcloud = LoadCurrentStatus();
+            currcloud.globalMetaData.FreeSelectionON = status;
+            UpdatePointSelection();
+        }
+        
         #endregion
 
         #region Link Clouds
@@ -825,19 +885,22 @@ namespace Data
 
         public void ChangeCollumnSelection(List<int> collumnList)
         {
-            
-            float xMax = Mathf.NegativeInfinity;
-            float xMin = Mathf.Infinity;
-            float yMax = Mathf.NegativeInfinity;
-            float yMin = Mathf.Infinity;
-            float zMax = Mathf.NegativeInfinity;
-            float zMin = Mathf.Infinity;
-            float iMax = Mathf.NegativeInfinity;
-            float iMin = Mathf.Infinity;
-            float tMax = Mathf.NegativeInfinity;
-            float tMin = Mathf.Infinity;
-
             CloudData currcloud = LoadCurrentStatus();
+
+            float xMax = currcloud.globalMetaData.columnMetaDataList[collumnList[0]].MaxValue;
+            float xMin = currcloud.globalMetaData.columnMetaDataList[collumnList[0]].MinValue;
+            float yMax = currcloud.globalMetaData.columnMetaDataList[collumnList[1]].MaxValue;
+            float yMin = currcloud.globalMetaData.columnMetaDataList[collumnList[1]].MinValue;
+            float zMax = currcloud.globalMetaData.columnMetaDataList[collumnList[2]].MaxValue;
+            float zMin = currcloud.globalMetaData.columnMetaDataList[collumnList[2]].MinValue;
+            float iMax = currcloud.globalMetaData.columnMetaDataList[collumnList[3]].MaxValue;
+            float iMin = currcloud.globalMetaData.columnMetaDataList[collumnList[3]].MinValue;
+            float tMax = currcloud.globalMetaData.columnMetaDataList[collumnList[4]].MaxValue;
+            float tMin = currcloud.globalMetaData.columnMetaDataList[collumnList[4]].MinValue;
+            float sMax = currcloud.globalMetaData.columnMetaDataList[collumnList[7]].MaxValue;
+            float sMin = currcloud.globalMetaData.columnMetaDataList[collumnList[7]].MinValue;
+
+
 
             GameObject trajobj = currcloud.trajectoryObject;
             currcloud.trajectoryObject = null;
@@ -847,6 +910,8 @@ namespace Data
             GameObject oriobj = currcloud.orientationObject;
             currcloud.orientationObject = null;
             Destroy(oriobj);
+
+
             List<float> TimeList = new List<float>();
             HashSet<float> TimeHash = new HashSet<float>();
             foreach (int key in currcloud.pointDataTable.Keys)
@@ -862,6 +927,7 @@ namespace Data
                 currcloud.pointDataTable[key].trajectory = currcloud.columnData[collumnList[5]][key];
                 currcloud.pointDataTable[key].intensity = currcloud.columnData[collumnList[3]][key];
 
+                /**
                 if (xMax < currcloud.pointDataTable[key].position.x) { xMax = currcloud.pointDataTable[key].position.x; }
                 if (xMin > currcloud.pointDataTable[key].position.x) { xMin = currcloud.pointDataTable[key].position.x; }
                 if (yMax < currcloud.pointDataTable[key].position.y) { yMax = currcloud.pointDataTable[key].position.y; }
@@ -872,7 +938,7 @@ namespace Data
                 if (iMin > currcloud.pointDataTable[key].intensity) { iMin = currcloud.pointDataTable[key].intensity; }
                 if (tMax < currcloud.pointDataTable[key].time) { tMax = currcloud.pointDataTable[key].time; }
                 if (tMin > currcloud.pointDataTable[key].time) { tMin = currcloud.pointDataTable[key].time; }
-
+            **/
                 TimeHash.Add(currcloud.pointDataTable[key].time);
 
             }
@@ -908,6 +974,7 @@ namespace Data
 
             int[] indices = new int[currcloud.pointDataTable.Count];
             Vector3[] verts = new Vector3[currcloud.pointDataTable.Count];
+            Vector2[] uv = new Vector2[currcloud.pointDataTable.Count];
             Vector2[] coloruv = new Vector2[currcloud.pointDataTable.Count];
             Vector2[] hiddenselecteduv = new Vector2[currcloud.pointDataTable.Count];
             Vector2[] trajectoryuv = new Vector2[currcloud.pointDataTable.Count]; 
@@ -917,6 +984,8 @@ namespace Data
                 currcloud.pointDataTable[key].normed_position = normedposition;
                 currcloud.pointDataTable[key]._color_index = (currcloud.pointDataTable[key].intensity - iMin) / (iMax - iMin);
                 currcloud.pointDataTable[key].frame = FrameDict[currcloud.pointDataTable[key].time];
+                
+                currcloud.pointDataTable[key].size = (currcloud.columnData[collumnList[8]][key] - sMin) / (sMax - sMin);
 
                 indices[key] = key;
                 verts[key] = normedposition;
@@ -935,6 +1004,7 @@ namespace Data
                     selected = 1f;
                 }
 
+                uv[key] = new Vector2(currcloud.pointDataTable[key].size, 0f);
                 coloruv[key] = new Vector2(currcloud.pointDataTable[key]._color_index,key);
                 hiddenselecteduv[key] = new Vector2(selected,hidden);
                 trajectoryuv[key] = new Vector2(currcloud.pointDataTable[key].trajectory, currcloud.pointDataTable[key].frame);
@@ -995,6 +1065,7 @@ namespace Data
             Mesh mesh = currcloud.gameObject.GetComponent<MeshFilter>().mesh;
             mesh.vertices = verts;
             mesh.SetIndices(indices, MeshTopology.Points, 0);
+            mesh.uv = uv;
             mesh.uv2 = coloruv;     // colorID, pointID
             mesh.uv3 = hiddenselecteduv;    // isSelected, isHidden
             //mesh.uv4 = trajectoryuv;
@@ -1002,6 +1073,7 @@ namespace Data
 
             ChangeCurrentColorMap(currcloud.globalMetaData.colormapName,currcloud.globalMetaData.colormapReversed);
             currcloud.globalMetaData.displayCollumnsConfiguration = collumnList.ToArray();
+            ChangeThreshold();
         }
         #region Thresholding
         public void ChangeThreshold()
@@ -1293,21 +1365,21 @@ namespace Data
             CloudData currcloud = LoadCurrentStatus();
             float phisum = 0f;
             float thetasum = 0f;
-            foreach(KeyValuePair<int, PointData> item in currcloud.pointDataTable)
+            foreach(int i in currcloud.globalMetaData.SelectedPointsList)
             {
-                phisum += item.Value.phi_angle;
-                thetasum += item.Value.theta_angle;
+                phisum += currcloud.pointDataTable[i].phi_angle;
+                thetasum += currcloud.pointDataTable[i].theta_angle;
             }
 
-            thetasum = thetasum / currcloud.pointDataTable.Count;
-            phisum = phisum / currcloud.pointDataTable.Count;
+            thetasum = thetasum / currcloud.globalMetaData.SelectedPointsList.Count;
+            phisum = phisum / currcloud.globalMetaData.SelectedPointsList.Count;
             string str = "Mean Orientation value :\n" +
                 "Theta : " + Math.Round(thetasum,3).ToString() + "\n" +
                 "Phi : " + Math.Round(phisum, 3).ToString();
 
-            currcloud.globalMetaData.meanPhiAngle = phisum;
-            currcloud.globalMetaData.meanThetaAngle = thetasum;
-
+            //currcloud.globalMetaData.meanPhiAngle = phisum;
+            //currcloud.globalMetaData.meanThetaAngle = thetasum;
+            //TODO : Inplement saving function into metadata
             ModalWindowManager.instance.CreateModalWindow(str);
         }
         #endregion
@@ -1352,8 +1424,6 @@ namespace Data
                     {
                         thread = PointSelectionThreadList.Dequeue();
                         Debug.Log("thread dequeued");
-                        //ChangeColorMap(thread.data.globalMetaData.cloud_id, thread.data.globalMetaData.colormapName, thread.data.globalMetaData.colormapReversed);
-                        Debug.Log("Colormap Changed");
                         thread.PointCloudMesh.uv3 = thread.PCuv3Array;
                         thread.data.GetComponent<MeshFilter>().mesh = thread.PointCloudMesh;
                         if (thread.data.trajectoryObject)
@@ -1426,8 +1496,6 @@ namespace Data
         protected override void Run()
         {
             //mesh = new Mesh();
-            vertices = new List<Vector3>();
-            indices = new List<int>();
 
             /**
             Debug.Log("xmin thresh"+currcloud.globalMetaData.xMinThreshold);
@@ -1440,29 +1508,41 @@ namespace Data
             Debug.Log("tmax thresh" + currcloud.globalMetaData.tMaxThreshold);
             **/
 
-            int counter = 0;
             foreach (KeyValuePair<int, PointData> kvp in currcloud.pointDataTable)
             {
                 //Debug.Log(kvp.Value.time);
-                vertices.Add(kvp.Value.normed_position);
-                indices.Add(counter);
+                currcloud.pointMetaDataTable[kvp.Key].isHidden = false;
+                uv2List[kvp.Key].y = 0f;
 
-
-                if (kvp.Value.position.x > currcloud.globalMetaData.xMinThreshold && kvp.Value.position.y > currcloud.globalMetaData.yMinThreshold && kvp.Value.position.z > currcloud.globalMetaData.zMinThreshold &&
-                   kvp.Value.position.x < currcloud.globalMetaData.xMaxThreshold && kvp.Value.position.y < currcloud.globalMetaData.yMaxThreshold && kvp.Value.position.z < currcloud.globalMetaData.zMaxThreshold &&
-                   kvp.Value.time > currcloud.globalMetaData.tMinThreshold && kvp.Value.time < currcloud.globalMetaData.tMaxThreshold)
+                //UPDATED VERSION OF THRESHOLDING
+                //CURRENTLY DONT WORK WITH DESKTOP CLIPPING PLANE
+                foreach (int i in currcloud.globalMetaData.displayCollumnsConfiguration)
                 {
-                    currcloud.pointMetaDataTable[kvp.Key].isHidden = false;
-                    uv2List[kvp.Key].y = 0f;
-                    counter++;
+                    if(currcloud.columnData[i][kvp.Key] < currcloud.globalMetaData.columnMetaDataList[i].MinThreshold || currcloud.columnData[i][kvp.Key] > currcloud.globalMetaData.columnMetaDataList[i].MaxThreshold)
+                    {
+                        currcloud.pointMetaDataTable[kvp.Key].isHidden = true;
+                        uv2List[kvp.Key].y = 1f;
 
-                }
-                else
-                {
-                    currcloud.pointMetaDataTable[kvp.Key].isHidden = true;
-                    uv2List[kvp.Key].y = 1f;
 
+                    }
                 }
+
+
+                //LEGACY VERSION OF THRESHOLDING
+                // if (kvp.Value.position.x > currcloud.globalMetaData.xMinThreshold && kvp.Value.position.y > currcloud.globalMetaData.yMinThreshold && kvp.Value.position.z > currcloud.globalMetaData.zMinThreshold &&
+                //    kvp.Value.position.x < currcloud.globalMetaData.xMaxThreshold && kvp.Value.position.y < currcloud.globalMetaData.yMaxThreshold && kvp.Value.position.z < currcloud.globalMetaData.zMaxThreshold &&
+                //    kvp.Value.time > currcloud.globalMetaData.tMinThreshold && kvp.Value.time < currcloud.globalMetaData.tMaxThreshold)
+                // {
+                //     currcloud.pointMetaDataTable[kvp.Key].isHidden = false;
+                //     uv2List[kvp.Key].y = 0f;
+
+                // }
+                // else
+                // {
+                //     currcloud.pointMetaDataTable[kvp.Key].isHidden = true;
+                //     uv2List[kvp.Key].y = 1f;
+                // }
+            
             }
 
             //Debug.Log(counter);
@@ -1561,12 +1641,19 @@ namespace Data
             {
                 currentCloud.globalMetaData.densityCalculated = true;
                 currentCloud.columnData.Add(densityArray);
+                currentCloud.globalMetaData.columnMetaDataList.Add(new ColumnMetadata());
             }
             else
             {
                 currentCloud.columnData[currentCloud.columnData.Count-1] = densityArray;
 
             }
+            currentCloud.globalMetaData.columnMetaDataList[currentCloud.globalMetaData.columnMetaDataList.Count - 1].ColumnID = currentCloud.globalMetaData.columnMetaDataList.Count-1;
+            currentCloud.globalMetaData.columnMetaDataList[currentCloud.globalMetaData.columnMetaDataList.Count - 1].MaxValue = currentCloud.globalMetaData.dMax;
+            currentCloud.globalMetaData.columnMetaDataList[currentCloud.globalMetaData.columnMetaDataList.Count - 1].MinValue = currentCloud.globalMetaData.dMin;
+            currentCloud.globalMetaData.columnMetaDataList[currentCloud.globalMetaData.columnMetaDataList.Count - 1].MaxThreshold = currentCloud.globalMetaData.dMax;
+            currentCloud.globalMetaData.columnMetaDataList[currentCloud.globalMetaData.columnMetaDataList.Count - 1].MinThreshold = currentCloud.globalMetaData.dMin;
+
             isRunning = false;
         }
 

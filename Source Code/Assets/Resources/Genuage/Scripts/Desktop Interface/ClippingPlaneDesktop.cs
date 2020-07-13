@@ -99,28 +99,21 @@ public class ClippingPlaneDesktop : MonoBehaviour
         yMaxBound = topRightAnchor.transform.position.y;
 
         
-        data.globalMetaData.xMinThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax,((xMinBound - xMinBack)/(xMaxBack - xMinBack)));
-        data.globalMetaData.xMaxThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax, ((xMaxBound - xMinBack)/(xMaxBack - xMinBack)));
-        data.globalMetaData.yMinThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMinBound - yMinBack)/(yMaxBack - yMinBack)));       
-        data.globalMetaData.yMaxThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMaxBound - yMinBack)/(yMaxBack - yMinBack)));
+        data.globalMetaData.columnMetaDataList[0].MinThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax,((xMinBound - xMinBack)/(xMaxBack - xMinBack)));
+        data.globalMetaData.columnMetaDataList[0].MaxThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax, ((xMaxBound - xMinBack)/(xMaxBack - xMinBack)));
+        data.globalMetaData.columnMetaDataList[1].MinThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMinBound - yMinBack)/(yMaxBack - yMinBack)));       
+        data.globalMetaData.columnMetaDataList[1].MaxThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMaxBound - yMinBack)/(yMaxBack - yMinBack)));
+
+        // data.globalMetaData.xMinThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax,((xMinBound - xMinBack)/(xMaxBack - xMinBack)));
+        // data.globalMetaData.xMaxThreshold = Mathf.Lerp(data.globalMetaData.xMin, data.globalMetaData.xMax, ((xMaxBound - xMinBack)/(xMaxBack - xMinBack)));
+        // data.globalMetaData.yMinThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMinBound - yMinBack)/(yMaxBack - yMinBack)));       
+        // data.globalMetaData.yMaxThreshold = Mathf.Lerp(data.globalMetaData.yMin, data.globalMetaData.yMax,((yMaxBound - yMinBack)/(yMaxBack - yMinBack)));
+
 
         CloudUpdater.instance.ChangeThreshold();
         
 
     }
 
-    // public List<Vector2[]> SaveThresholdingToKeyframe(List<Vector2[]> threList)
-    // {
-    //     Vector2[] thre_entry = new Vector2[2];
-    //     thre_entry[0].x = data.globalMetaData.xMinThreshold;
-    //     thre_entry[0].y = data.globalMetaData.xMaxThreshold;
-
-    //     thre_entry[1].x = data.globalMetaData.yMinThreshold;
-    //     thre_entry[1].y = data.globalMetaData.yMaxThreshold;
-
-    //     threList.Add(thre_entry);
-
-    //     return threList;
-    // }
 
 }

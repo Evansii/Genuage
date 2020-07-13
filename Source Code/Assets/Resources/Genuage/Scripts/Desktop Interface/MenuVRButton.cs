@@ -73,15 +73,15 @@ namespace DesktopInterface
         public void SwitchVR()
         {
             _vr_enabled = !_vr_enabled;
-            if(_vr_enabled)
+            if (_vr_enabled == true)
             {
                 VRTK_SDKManager.instance.TryLoadSDKSetupFromList(true);
             }
             else
             {
-                VRTK_SDKManager.AttemptUnloadSDKSetup(true);
-            }
+                VRTK_SDKManager.instance.UnloadSDKSetup(true);
 
+            }
             _desktop_camera.enabled = !_vr_enabled;
             _desktop_camera.gameObject.SetActive(!_vr_enabled);
             _VR_Camera.enabled = _vr_enabled;

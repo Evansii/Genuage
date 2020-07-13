@@ -125,26 +125,44 @@ namespace IO
 
         }
 
-        public void LoadFromConnection(List<float[]> collumnDataList, int SMAPColorField)
+        public void LoadFromConnection(List<float[]> columnDataList, int SMAPColorField)
         {
             savedata = null;
             window = ModalWindowManager.instance.CreateModalWindow("Loading the cloud, please wait...");
 
-            foreach (float[] i in collumnDataList)
+            foreach (float[] i in columnDataList)
             {
                 foreach (float pointvalue in i)
                 {
                     if (!(pointvalue.GetType() == typeof(float)))
                     {
                         ModalWindowManager.instance.CreateModalWindow("ERROR : Data number format is not float");
+                        Destroy(window);
                         return;
                     }
                 }
             }
-            GameObject cloud = CreateCloudPoint(collumnDataList, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
+
+            GameObject cloud = CreateCloudPoint(columnDataList, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
             PutInMemory(cloud);
             Destroy(window);
-           //OnCloudCreated(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
+            CloudSelector.instance.UpdateSelection(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
+
+            //OnCloudCreated(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
+
+        }
+
+        public void LoadFromRawData(List<float[]> columnDataList)
+        {
+            savedata = null;
+            window = ModalWindowManager.instance.CreateModalWindow("Loading the cloud, please wait...",false);
+
+            GameObject cloud = CreateCloudPoint(columnDataList);
+            PutInMemory(cloud);
+            Destroy(window);
+            CloudSelector.instance.UpdateSelection(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
+
+            //OnCloudCreated(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
 
         }
 
@@ -651,14 +669,14 @@ namespace IO
             CloudStorage.instance.AddCloud(cloud);
         }
 
-        private GameObject CreateCloudPoint(List<float[]> collumnDataList, string file_path = null, bool isJSON = false, string json_path = null, int SMAPcolorcolumn = 100, bool isSMAP = false)
+        private GameObject CreateCloudPoint(List<float[]> columnDataList, string file_path = null, bool isJSON = false, string json_path = null, int SMAPcolorcolumn = 100, bool isSMAP = false)
         {
             GameObject container = Instantiate(_cloudPointPrefab) as GameObject; /// GameObject that is the parent of the CloudPoint (used for CloudParent offset)
             GameObject root = container.transform.Find("CloudPoint").gameObject; /// GameObject where the mesh will be displayed
 
             // Init Cloud Status and references
             CloudData rootdata = root.GetComponent<CloudData>();
-            rootdata.columnData = collumnDataList;
+            rootdata.columnData = columnDataList;
 
             if (isJSON && json_path != null)
             {
@@ -666,8 +684,8 @@ namespace IO
             }
             else
             {
-                int[] intarray = new int[9] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                for (int i = 0; i< collumnDataList.Count; i++)
+                int[] intarray = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                for (int i = 0; i< columnDataList.Count; i++)
                 {
                     if(i < intarray.Length)
                     {
@@ -686,14 +704,46 @@ namespace IO
                 if(SMAPcolorcolumn != 100 )
                     rootdata.globalMetaData.displayCollumnsConfiguration[3] = SMAPcolorcolumn;
                 
-                rootdata.globalMetaData.displayCollumnsConfiguration[8] = 5;
+                rootdata.globalMetaData.displayCollumnsConfiguration[9] = 5;
             }
-            for ( int i = 0 ; i < collumnDataList[0].Length; i++)
+
+            for (int j = 0; j < columnDataList.Count; j++)
+            {
+                ColumnMetadata metadata = new ColumnMetadata();
+                metadata.ColumnID = j;
+                metadata.MinValue = Mathf.Infinity;
+                metadata.MaxValue = Mathf.NegativeInfinity;
+                metadata.Range = 0;
+                metadata.MinThreshold = 0;
+                metadata.MaxThreshold = 0;
+                rootdata.globalMetaData.columnMetaDataList.Add(metadata);
+            }
+
+            for ( int i = 0 ; i < columnDataList[0].Length; i++)
             {
                 rootdata.CreatePointData(i, Vector3.zero, Vector3.zero, 0f, 0f, 0f, Color.black, 0f);
 
                 rootdata.CreatePointMetaData(i, 0);
                 
+                for(int j = 0; j < columnDataList.Count; j++)
+                {
+                    float nbr = columnDataList[j][i];
+                    if(nbr < rootdata.globalMetaData.columnMetaDataList[j].MinValue)
+                    {
+                        rootdata.globalMetaData.columnMetaDataList[j].MinValue = nbr;
+                    }
+
+                    if(nbr > rootdata.globalMetaData.columnMetaDataList[j].MaxValue)
+                    {
+                        rootdata.globalMetaData.columnMetaDataList[j].MaxValue = nbr;
+                    }
+                }
+                foreach(ColumnMetadata md in rootdata.globalMetaData.columnMetaDataList)
+                {
+                    md.MaxThreshold = md.MaxValue;
+                    md.MinThreshold = md.MinValue;
+                    md.Range = md.MaxValue - md.MinValue;
+                }
             }
 
             LoadCloudData(rootdata,file_path,isJSON, isSMAP);
@@ -731,6 +781,10 @@ namespace IO
             float[] _phi = new float[N];
             float[] _theta = new float[N];
 
+            float[] _size = new float[N];
+
+            List<Vector2> uv0List = new List<Vector2>();
+
             List<Vector2> uv1List = new List<Vector2>();
             List<Vector2> uv2List = new List<Vector2>();
             List<Vector2> uv3List = new List<Vector2>();
@@ -750,6 +804,10 @@ namespace IO
             float tMin = Mathf.Infinity;
 
 
+            float sMax = Mathf.NegativeInfinity;
+            float sMin = Mathf.Infinity;
+
+
             HashSet<float> TimeSet = new HashSet<float>();
             List<float> TimeList = new List<float>();
 
@@ -767,8 +825,11 @@ namespace IO
                 _phi[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[6]][i];
                 _theta[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[7]][i];
                 
+
+                _size[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[8]][i];
+
                 if(isSMAP == true)
-                    _hidden[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[8]][i];
+                    _hidden[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[9]][i];
 
                 //Debug.Log("Frame " + i + " : " + _frame[i]);
                 _intensity[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[3]][i];
@@ -777,6 +838,7 @@ namespace IO
                 //Debug.Log(_indices[i]);
 
                 // Update min max
+                /**
                 if (xMax < _positions[i].x) { xMax = _positions[i].x; }
                 if (xMin > _positions[i].x) { xMin = _positions[i].x; }
                 if (yMax < _positions[i].y) { yMax = _positions[i].y; }
@@ -787,8 +849,24 @@ namespace IO
                 if (iMin > _intensity[i]) { iMin = _intensity[i]; }
                 if (tMax < _time[i]) { tMax = _time[i]; }
                 if (tMin > _time[i]) { tMin = _time[i]; }
-                bool check = false;
-                
+                **/
+
+                xMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[0]].MaxValue;
+                xMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[0]].MinValue;
+                yMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[1]].MaxValue;
+                yMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[1]].MinValue;
+                zMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[2]].MaxValue;
+                zMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[2]].MinValue;
+                iMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[3]].MaxValue;
+                iMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[3]].MinValue;
+                tMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].MaxValue;
+                tMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].MinValue;
+
+                sMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[7]].MaxValue;
+                sMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[7]].MinValue;
+
+
+
                 TimeSet.Add(_time[i]);
     
 
@@ -805,11 +883,11 @@ namespace IO
                 FrameDict.Add(TimeList[u], u);
             }
 
-            float xRange = xMax - xMin;
-            float yRange = yMax - yMin;
-            float zRange = zMax - zMin;
-            float iRange = iMax - iMin;
-            float tRange = tMax - tMin;
+            float xRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[0]].Range;
+            float yRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[1]].Range;
+            float zRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[2]].Range;
+            float iRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[3]].Range;
+            float tRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].Range;
 
             float[] rangeList = new float[] { xRange, yRange, zRange };
             float MaxRange = Mathf.Max(rangeList);
@@ -838,6 +916,7 @@ namespace IO
                 cloud_data.pointDataTable[point].time = _time[point];
                 cloud_data.pointDataTable[point].frame = FrameDict[_time[point]];
                 cloud_data.pointDataTable[point].trajectory = _trajectory[point];
+                cloud_data.pointDataTable[point].size = (_size[point] - sMin) / (sMax - sMin);
                 cloud_data.pointDataTable[point].phi_angle = _phi[point];
                 cloud_data.pointDataTable[point].theta_angle = _theta[point];
                 
@@ -851,6 +930,7 @@ namespace IO
                 //cloud_data.pointDataTable[point].color = _colors[point];
                 cloud_data.pointDataTable[point]._color_index = _colors[point].r;
 
+                uv0List.Add(new Vector2(cloud_data.pointDataTable[point].size, 0f));
                 uv1List.Add(new Vector2(cloud_data.pointDataTable[point]._color_index, point));
                 //uv3List.Add(new Vector2(cloud_data.pointDataTable[point].trajectory, cloud_data.pointDataTable[point].time));
                 cloud_data.pointDataTable[point].depth = _positions[point].z;
@@ -892,6 +972,13 @@ namespace IO
             cloud_data.globalMetaData.lowerframeLimit = -1f;
             cloud_data.globalMetaData.upperframeLimit = TimeList.Count;
 
+            Debug.Log("NormedXMIN" + normedxMin);
+            Debug.Log("NormedXMAX" + normedxMax);
+            Debug.Log("NormedYMIN" + normedyMin);
+            Debug.Log("NormedYMAX" + normedyMax);
+            Debug.Log("NormedZMIN" + normedzMin);
+            Debug.Log("NormedZMAX" + normedzMax);
+
             if (file_path == null)
             {
                 cloud_data.globalMetaData.fileName = "Cloud - "+N+" points";
@@ -915,10 +1002,10 @@ namespace IO
             }
             cloud_data.InitGlobalCloudConstant(xMax, xMin, yMax, yMin, zMax, zMin, iMax, iMin, tMax, tMin);
 
-            LoadCloudMesh(cloud_data,_normed_positions,_indices, uv1List.ToArray(), uv2List.ToArray(), uv3List.ToArray());
+            LoadCloudMesh(cloud_data,_normed_positions,_indices, uv0List.ToArray(), uv1List.ToArray(), uv2List.ToArray(), uv3List.ToArray());
         }
 
-        private void LoadCloudMesh(CloudData root, Vector3[] vertices, int[] indices, Vector2[] uv1Array, Vector2[] uv2Array, Vector2[] uv3Array)
+        private void LoadCloudMesh(CloudData root, Vector3[] vertices, int[] indices, Vector2[] uv0Array, Vector2[] uv1Array, Vector2[] uv2Array, Vector2[] uv3Array)
         {
             Material material = new Material(Shader.Find("ViSP/Sprite Shader"));
             material.SetTexture("_SpriteTex", _sprite_texture);
@@ -929,7 +1016,7 @@ namespace IO
             Mesh mesh = new Mesh();
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             mesh.vertices = vertices;
-
+            mesh.uv = uv0Array;
             mesh.uv2 = uv1Array; // colorID, pointID
             mesh.uv3 = uv2Array; // isSelected, isHidden
             //mesh.uv4 = uv3Array; // trajectoryID, frame
