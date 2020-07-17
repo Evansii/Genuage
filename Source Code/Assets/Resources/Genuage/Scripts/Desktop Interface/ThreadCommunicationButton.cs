@@ -62,6 +62,7 @@ namespace DesktopInterface
             {
                 window = ModalWindowManager.instance.CreateModalWindow("Waiting For Messages...", false);
                 CreateThread();
+                //thread.progressUI = window.transform.GetChild(0).GetComponent<Text>();
                 //GetComponentInChildren<Text>().text = "Cancel Communication";
                 thread.StartThread();
                 threadON = true;
@@ -97,7 +98,7 @@ namespace DesktopInterface
             {
                 if (!thread.isRunning)
                 {
-                    Destroy(window);
+                    //Destroy(window);
                     thread.StopThread();
                     threadON = false;
 
@@ -132,6 +133,10 @@ namespace DesktopInterface
                         ModalWindowManager.instance.CreateModalWindow("ERROR : All collumns do not have the same size");
                     }
                     GetComponentInChildren<Text>().text = defaultText;
+                }
+                else
+                {
+                    window.transform.GetChild(0).GetComponent<Text>().text = thread.progressUI;
                 }
             }
         }

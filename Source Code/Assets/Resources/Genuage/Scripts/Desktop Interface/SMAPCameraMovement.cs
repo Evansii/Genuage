@@ -61,6 +61,7 @@ public class SMAPCameraMovement : MonoBehaviour
     public void ResetPosition()
     {
         this.gameObject.transform.position = new Vector3(0,0,-2);
+        this.gameObject.transform.localEulerAngles = Vector3.zero;
     }
 
 

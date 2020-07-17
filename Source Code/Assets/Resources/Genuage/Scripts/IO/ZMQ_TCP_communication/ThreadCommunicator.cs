@@ -43,6 +43,7 @@ namespace IO
     public abstract class ThreadCommunicator : RunnableThread
     {
         public List<float[]> dataList;
+        public string progressUI;
         public ReceiveStatus receive_status;
 
         public int SMAPColorField;

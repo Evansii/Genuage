@@ -57,6 +57,8 @@ namespace IO
             
             colorTransition = new Dictionary<string ,string>();
 
+            // progressUI = GameObject.Find("Modal Window").transform.GetChild(0).GetComponent<Text>();
+
             listener = new TcpListener(IPAddress.Any,5555);
 
             InitialiseColorMapTransition();
@@ -92,6 +94,7 @@ namespace IO
             
             listener.Start();
             Debug.Log("is listening (Vincent Version)");
+            progressUI = "Run SMAP Plugin to load Data";
 
             while(true)
             {
@@ -122,7 +125,7 @@ namespace IO
 
                         case "LC":
                             isLoading = false;
-                            Debug.Log("you got Data!");
+                            progressUI = package_count +"/"+nb_packages+" received...";
                             GetLocData(client,ns);
                             request_type ="";
                             break;
@@ -167,6 +170,7 @@ namespace IO
                         package_count = 0;
                         isColorSet = false;
                         Debug.Log("All Data acquired");
+                        progressUI = "All Packages acquired";
                         return ReceiveStatus.SUCCESS;
                     }
 
@@ -238,7 +242,6 @@ namespace IO
             byte[] bytes = new byte[client.ReceiveBufferSize];
             var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
             int color_field = BitConverter.ToInt32(bytes,0);
-            Debug.Log(color_field);
             return color_field;
             
         }
@@ -268,7 +271,6 @@ namespace IO
                 index++;               
 
             }
-            Debug.Log(package_count);
             package_count++;
             isLoading = true;
             if(package_count == nb_packages)
@@ -288,7 +290,6 @@ namespace IO
             }
 
             
-            //Data processed in column?
             
         }
 

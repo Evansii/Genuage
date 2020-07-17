@@ -58,7 +58,7 @@ namespace Data
 
         CalculateDensityThreadHandler densityThreadHandle;
         //Thread calculatedensity;
-        bool densityJobON = false;
+        public bool densityJobON = false;
         int idThreaded;
 
         private Queue<SelectPointsThreadHandler> PointSelectionThreadList;

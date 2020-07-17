@@ -42,6 +42,7 @@ namespace DesktopInterface
     {
         public float radius;
         public InputField _field;
+        public GameObject _progressUI;
         // Start is called before the first frame update
         void Start()
         {
@@ -58,6 +59,7 @@ namespace DesktopInterface
 
         public override void Execute()
         {
+            _progressUI.SetActive(true);
             CloudUpdater.instance.CalculateDensity(radius);
         }
 
@@ -78,6 +80,14 @@ namespace DesktopInterface
             {
                 OnValueChanged(new_value);
             }
+        }
+
+        void Update()
+        {
+            if(CloudUpdater.instance.densityJobON == false && _progressUI.activeInHierarchy)
+            {
+                _progressUI.SetActive(false);
+            }  
         }
     }
 }
