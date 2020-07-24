@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class TogglePointSize : MonoBehaviour
 {
+
+    public string propertyToEnable;
     public Toggle toggle; 
     // Start is called before the first frame update
     void Start()
@@ -19,11 +21,11 @@ public class TogglePointSize : MonoBehaviour
     {
         if (b)
         {
-            Shader.EnableKeyword("POINTSIZE");
+            Shader.EnableKeyword(propertyToEnable);
         }
         else
         {
-            Shader.DisableKeyword("POINTSIZE");
+            Shader.DisableKeyword(propertyToEnable);
         }
     }
 }

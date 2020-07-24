@@ -74,6 +74,7 @@ namespace Data
             ColorMap c8 = GenerateColorMap("jet", new List<Color>() { Color.blue, Color.cyan, Color.green, Color.yellow, Color.red});
             ColorMap c9 = GenerateColorMap("hsv", new List<Color>() { Color.red, Color.yellow, Color.green,Color.blue, Color.cyan, Color.magenta, Color.red });
             ColorMap c10 = GenerateColorMap("gray",new List<Color>(){ new Color(0.2f, 0.2f, 0.2f), Color.white});
+        
 
 
             colormapDict.Add(c1.name, c1);
@@ -86,6 +87,7 @@ namespace Data
             colormapDict.Add(c8.name, c8);
             colormapDict.Add(c9.name, c9);
             colormapDict.Add(c10.name, c10);
+            
         }
 
         private ColorMap GenerateColorMap(string name, List<Color> colors)

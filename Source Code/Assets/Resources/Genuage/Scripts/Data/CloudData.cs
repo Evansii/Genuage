@@ -56,6 +56,9 @@ namespace Data
         public float _depth;
         public float _phi_angle;
         public float _theta_angle;
+
+        //BRIGHTNESS
+        public float _brightness;
         
 
 
@@ -133,6 +136,13 @@ namespace Data
         {
             get { return _phi_angle; }
             set { _phi_angle = value; }
+        }
+
+        //BRIGHTNESS
+        public float brightness
+        {
+            get { return -_brightness; }
+            set { _brightness = value; }
         }
     }
 
@@ -250,6 +260,9 @@ namespace Data
         private float _tMax, _tMin; // frame
         private float _dMax, _dMin; // density
         private float _sMax, _sMin; // size
+
+        //BRIGHTNESS
+        private float _bMax, _bMin; //brightness
 
 
         public float xMinThreshold;
@@ -418,6 +431,20 @@ namespace Data
             get { return _iMin; }
             set { _iMin = value; }
         }
+
+        //BRIGHTNESS
+        public float bMax
+        {
+            get { return _bMax; }
+            set { _bMax = value; }
+        }
+
+        public float bMin
+        {
+            get { return _bMin; }
+            set { _bMin = value; }
+        }
+
 
         public float tMax
         {
@@ -681,7 +708,7 @@ namespace Data
         }
 
         public void InitGlobalCloudConstant(float xmax, float xmin, float ymax, float ymin, float zmax,
-            float zmin, float imax, float imin, float tmax, float tmin, float dMax = 10000000.0f,
+            float zmin, float imax, float imin, float tmax, float tmin, float bmax, float bmin, float dMax = 10000000.0f,
             float dMin = 0.0f)
         {
             globalMetaData.normed_x = new Vector2(xmin, xmax);
@@ -700,6 +727,10 @@ namespace Data
             globalMetaData.iMin = imin;
             globalMetaData.tMax = tmax;
             globalMetaData.tMin = tmin;
+
+            //BRIGHTNESS
+            globalMetaData.bMax = bmax;
+            globalMetaData.bMin = bmin;
 
             globalMetaData.xMaxThreshold = xmax;
             globalMetaData.xMinThreshold = xmin;

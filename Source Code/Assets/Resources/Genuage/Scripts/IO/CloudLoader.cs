@@ -684,7 +684,7 @@ namespace IO
             }
             else
             {
-                int[] intarray = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                int[] intarray = new int[11] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                 for (int i = 0; i< columnDataList.Count; i++)
                 {
                     if(i < intarray.Length)
@@ -703,8 +703,16 @@ namespace IO
             
                 if(SMAPcolorcolumn != 100 )
                     rootdata.globalMetaData.displayCollumnsConfiguration[3] = SMAPcolorcolumn;
+                if(isSMAP)
+                {
+                    rootdata.globalMetaData.displayCollumnsConfiguration[10] = 5;
+                    
+                    //Adjust Brightness to Localization Precision
+                    rootdata.globalMetaData.displayCollumnsConfiguration[9] = 3;
+
+
+                }
                 
-                rootdata.globalMetaData.displayCollumnsConfiguration[9] = 5;
             }
 
             for (int j = 0; j < columnDataList.Count; j++)
@@ -783,11 +791,17 @@ namespace IO
 
             float[] _size = new float[N];
 
+            float[] _brightness = new float[N];
+
+
+
+
             List<Vector2> uv0List = new List<Vector2>();
 
             List<Vector2> uv1List = new List<Vector2>();
             List<Vector2> uv2List = new List<Vector2>();
             List<Vector2> uv3List = new List<Vector2>();
+            List<Vector2> uv4List = new List<Vector2>();
 
             Vector3[] _normed_positions = new Vector3[N];
 
@@ -802,6 +816,10 @@ namespace IO
             float iMin = Mathf.Infinity;
             float tMax = Mathf.NegativeInfinity;
             float tMin = Mathf.Infinity;
+
+            //BRIGHTNESS
+            float bMax = Mathf.NegativeInfinity;
+            float bMin = Mathf.Infinity;
 
 
             float sMax = Mathf.NegativeInfinity;
@@ -829,10 +847,13 @@ namespace IO
                 _size[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[8]][i];
 
                 if(isSMAP == true)
-                    _hidden[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[9]][i];
+                    _hidden[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[10]][i];
 
                 //Debug.Log("Frame " + i + " : " + _frame[i]);
                 _intensity[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[3]][i];
+
+                //BRIGHTNESS
+                _brightness[i] = cloud_data.columnData[cloud_data.globalMetaData.displayCollumnsConfiguration[9]][i];
                 //Debug.Log("Intensity " + i + " : " + _intensity[i]);
                 _indices[i] = i;
                 //Debug.Log(_indices[i]);
@@ -862,8 +883,12 @@ namespace IO
                 tMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].MaxValue;
                 tMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].MinValue;
 
-                sMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[7]].MaxValue;
-                sMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[7]].MinValue;
+                //BRIGHTNESS
+                bMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[9]].MaxValue;
+                bMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[9]].MinValue;
+
+                sMax = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[8]].MaxValue;
+                sMin = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[8]].MinValue;
 
 
 
@@ -888,6 +913,9 @@ namespace IO
             float zRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[2]].Range;
             float iRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[3]].Range;
             float tRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[4]].Range;
+
+            //BRIGHTNESS
+            float bRange = cloud_data.globalMetaData.columnMetaDataList[cloud_data.globalMetaData.displayCollumnsConfiguration[9]].Range;
 
             float[] rangeList = new float[] { xRange, yRange, zRange };
             float MaxRange = Mathf.Max(rangeList);
@@ -919,7 +947,11 @@ namespace IO
                 cloud_data.pointDataTable[point].size = (_size[point] - sMin) / (sMax - sMin);
                 cloud_data.pointDataTable[point].phi_angle = _phi[point];
                 cloud_data.pointDataTable[point].theta_angle = _theta[point];
-                
+
+                //BRIGHTNESS
+                cloud_data.pointDataTable[point].brightness = Mathf.Lerp(1, 0 ,(_brightness[point]- bMin) /(bMax - bMin));
+                cloud_data.pointDataTable[point].brightness = -cloud_data.pointDataTable[point].brightness;
+            
                 //Vincent Casamayou 15/05/2020 - SMAP COMMUNICATION
                 //Hide point at creation
                 if(_hidden[point] != 0f)
@@ -929,9 +961,10 @@ namespace IO
                 
                 //cloud_data.pointDataTable[point].color = _colors[point];
                 cloud_data.pointDataTable[point]._color_index = _colors[point].r;
+                
+                uv0List.Add(new Vector2(cloud_data.pointDataTable[point].size, 0f ));
+                uv1List.Add(new Vector2(cloud_data.pointDataTable[point]._color_index, cloud_data.pointDataTable[point].brightness));
 
-                uv0List.Add(new Vector2(cloud_data.pointDataTable[point].size, 0f));
-                uv1List.Add(new Vector2(cloud_data.pointDataTable[point]._color_index, point));
                 //uv3List.Add(new Vector2(cloud_data.pointDataTable[point].trajectory, cloud_data.pointDataTable[point].time));
                 cloud_data.pointDataTable[point].depth = _positions[point].z;
 
@@ -949,6 +982,10 @@ namespace IO
 
                 uv3List.Add(new Vector2(cloud_data.pointDataTable[point].trajectory, cloud_data.pointDataTable[point].frame));
 
+                //BRIGHTNESS
+                //Vincent - uv4.y is a placeholder
+                //uv4List.Add(new Vector2(cloud_data.pointDataTable[point].brightness, point));
+                
                 if (normedxMax < _normed_positions[point].x) { normedxMax = _normed_positions[point].x; }
                 if (normedxMin > _normed_positions[point].x) { normedxMin = _normed_positions[point].x; }
                 if (normedyMax < _normed_positions[point].y) { normedyMax = _normed_positions[point].y; }
@@ -959,7 +996,8 @@ namespace IO
 
             }
 
-
+            Debug.Log(cloud_data.pointDataTable[12].size+" and " + cloud_data.pointDataTable[12].brightness);
+            Debug.Log(cloud_data.pointDataTable[123].size+" and " + cloud_data.pointDataTable[123].brightness);
             cloud_data.globalMetaData.maxRange = MaxRange;
             cloud_data.globalMetaData.offsetVector = offsetVector;
             cloud_data.globalMetaData.normed_xMax = normedxMax;
@@ -1000,16 +1038,18 @@ namespace IO
                 cloud_data.globalMetaData.point_size = 0.1f;
                 cloud_data.globalMetaData.scale = Vector3.one;
             }
-            cloud_data.InitGlobalCloudConstant(xMax, xMin, yMax, yMin, zMax, zMin, iMax, iMin, tMax, tMin);
+            //BRIGHTNESS
+            cloud_data.InitGlobalCloudConstant(xMax, xMin, yMax, yMin, zMax, zMin, iMax, iMin, tMax, tMin, bMax, bMin);
 
-            LoadCloudMesh(cloud_data,_normed_positions,_indices, uv0List.ToArray(), uv1List.ToArray(), uv2List.ToArray(), uv3List.ToArray());
+            LoadCloudMesh(cloud_data,_normed_positions,_indices, uv0List.ToArray(), uv1List.ToArray(), uv2List.ToArray(), uv3List.ToArray(), uv4List.ToArray());
         }
 
-        private void LoadCloudMesh(CloudData root, Vector3[] vertices, int[] indices, Vector2[] uv0Array, Vector2[] uv1Array, Vector2[] uv2Array, Vector2[] uv3Array)
+        private void LoadCloudMesh(CloudData root, Vector3[] vertices, int[] indices, Vector2[] uv0Array, Vector2[] uv1Array, Vector2[] uv2Array, Vector2[] uv3Array, Vector2[] uv4Array)
         {
             Material material = new Material(Shader.Find("ViSP/Sprite Shader"));
             material.SetTexture("_SpriteTex", _sprite_texture);
-            material.SetTexture("_ColorTex", ColorMapManager.instance.GetColorMap("autumn").texture);
+            var cMap = ColorMapManager.instance.GetColorMap("autumn").texture;
+            material.SetTexture("_ColorTex", cMap);
             material.SetFloat("UpperTimeLimit", root.globalMetaData.upperframeLimit);
             material.SetFloat("LowerTimeLimit", root.globalMetaData.lowerframeLimit);
             root.gameObject.GetComponent<MeshRenderer>().material = material;

@@ -897,9 +897,12 @@ namespace Data
             float iMin = currcloud.globalMetaData.columnMetaDataList[collumnList[3]].MinValue;
             float tMax = currcloud.globalMetaData.columnMetaDataList[collumnList[4]].MaxValue;
             float tMin = currcloud.globalMetaData.columnMetaDataList[collumnList[4]].MinValue;
-            float sMax = currcloud.globalMetaData.columnMetaDataList[collumnList[7]].MaxValue;
-            float sMin = currcloud.globalMetaData.columnMetaDataList[collumnList[7]].MinValue;
+            float sMax = currcloud.globalMetaData.columnMetaDataList[collumnList[8]].MaxValue;
+            float sMin = currcloud.globalMetaData.columnMetaDataList[collumnList[8]].MinValue;
 
+            //BRIGHTNESS
+            float bMax = currcloud.globalMetaData.columnMetaDataList[collumnList[9]].MaxValue;
+            float bMin = currcloud.globalMetaData.columnMetaDataList[collumnList[9]].MinValue;
 
 
             GameObject trajobj = currcloud.trajectoryObject;
@@ -926,6 +929,9 @@ namespace Data
 
                 currcloud.pointDataTable[key].trajectory = currcloud.columnData[collumnList[5]][key];
                 currcloud.pointDataTable[key].intensity = currcloud.columnData[collumnList[3]][key];
+
+                //BRIGHTNESS
+                currcloud.pointDataTable[key].brightness = currcloud.columnData[collumnList[9]][key];
 
                 /**
                 if (xMax < currcloud.pointDataTable[key].position.x) { xMax = currcloud.pointDataTable[key].position.x; }
@@ -959,6 +965,10 @@ namespace Data
             float zRange = zMax - zMin;
             float iRange = iMax - iMin;
             float tRange = tMax - tMin;
+
+            //BRIGHTNESS
+            float bRange = bMax - bMin;
+
             float MaxRange = Mathf.Max(xRange, yRange, zRange);
 
             Vector3 offsetVector = new Vector3((xMin + xMax) / 2,
@@ -987,6 +997,11 @@ namespace Data
                 
                 currcloud.pointDataTable[key].size = (currcloud.columnData[collumnList[8]][key] - sMin) / (sMax - sMin);
 
+                //BRIGHTNESS
+
+                 currcloud.pointDataTable[key].brightness = Mathf.Lerp(1, 0 ,(currcloud.columnData[collumnList[9]][key] - bMin) /(bMax - bMin));
+
+
                 indices[key] = key;
                 verts[key] = normedposition;
                 float hidden;
@@ -1004,8 +1019,8 @@ namespace Data
                     selected = 1f;
                 }
 
-                uv[key] = new Vector2(currcloud.pointDataTable[key].size, 0f);
-                coloruv[key] = new Vector2(currcloud.pointDataTable[key]._color_index,key);
+                uv[key] = new Vector2(currcloud.pointDataTable[key].size,0f);
+                coloruv[key] = new Vector2(currcloud.pointDataTable[key]._color_index, currcloud.pointDataTable[key].brightness);
                 hiddenselecteduv[key] = new Vector2(selected,hidden);
                 trajectoryuv[key] = new Vector2(currcloud.pointDataTable[key].trajectory, currcloud.pointDataTable[key].frame);
 

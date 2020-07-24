@@ -40,6 +40,7 @@ Shader "ViSP/Sprite Shader"
 		_ColorTex("Texture", 2D) = "white" {}
 
 		_Size("Size", Range(0, 0.05)) = 0.01
+		_Brightness("Brightness",Range(0,1)) = 1
 		//_Color("Color", Color) = (.34, .85, .92, 1)
 	}
 
@@ -81,6 +82,7 @@ Shader "ViSP/Sprite Shader"
 			#pragma multi_compile _ COLORMAP_REVERSED
 			#pragma multi_compile _ FREE_SELECTION
 			#pragma multi_compile _ POINTSIZE
+			#pragma multi_compile _ POINT_BRIGHTNESS
 
 			#include "UnityCG.cginc" 
 
@@ -92,6 +94,7 @@ Shader "ViSP/Sprite Shader"
 				float2 uv1 : TEXCOORD1; // colorindex, pointID
 				float2 uv2 : TEXCOORD2; //isSelected, isHidden, 0 for false
 				float2 uv3 : TEXCOORD3; // trajectoryID, frame of apparition, Size, unused
+				//float2 uv4 : TEXCOORD4;
 
 				float4 color : COLOR;
 
@@ -105,8 +108,10 @@ Shader "ViSP/Sprite Shader"
 				float2 uv1 : TEXCOORD1; // colorindex, pointID
 				float2 uv2 : TEXCOORD2; //isSelected, isHidden, 0 for false
 				float2 uv3 : TEXCOORD3; // trajectoryID, frame of apparition, Size, unused
+				//float2 uv4 : TEXCOORD4;
 
 				float4 color : COLOR0;
+
 			};
 
 
@@ -115,6 +120,9 @@ Shader "ViSP/Sprite Shader"
 			SamplerState sampler_SpriteTex;
 
 			uniform sampler _ColorTex;
+			//Brightness
+			float _Brightness;
+
 
 			float4 _SpherePosition;
 			float _SphereRadius;
@@ -162,6 +170,7 @@ Shader "ViSP/Sprite Shader"
 				output.color = v.color;
 				output.uv2 = v.texcoord2;
 				output.uv3 = v.texcoord3;
+				//output.uv4 = v.texcoord4;
 
 				return output;
 			}
@@ -210,6 +219,7 @@ Shader "ViSP/Sprite Shader"
 				output.uv1 = p[0].uv1;
 				output.uv2 = p[0].uv2;
 				output.uv3 = p[0].uv3;
+				//output.uv4 = p[0].uv4;
 
 				stream.Append(output);
 
@@ -220,6 +230,8 @@ Shader "ViSP/Sprite Shader"
 				output.uv1 = p[0].uv1;
 				output.uv2 = p[0].uv2;
 				output.uv3 = p[0].uv3;
+				//output.uv4 = p[0].uv4;
+				
 				stream.Append(output);
 
 				output.vertex = UnityObjectToClipPos(vertices[2]);
@@ -229,6 +241,7 @@ Shader "ViSP/Sprite Shader"
 				output.uv1 = p[0].uv1;
 				output.uv2 = p[0].uv2;
 				output.uv3 = p[0].uv3;
+				//output.uv4 = p[0].uv4;
 				stream.Append(output);
 
 				output.vertex = UnityObjectToClipPos(vertices[3]);
@@ -238,11 +251,13 @@ Shader "ViSP/Sprite Shader"
 				output.uv1 = p[0].uv1;
 				output.uv2 = p[0].uv2;
 				output.uv3 = p[0].uv3;
+				//output.uv4 = p[0].uv4;
 				stream.Append(output);
 
 
 
 			}
+
 
 			// Fragment Shader
 			float4 fragment_shader(fragment_input input) : COLOR
@@ -341,6 +356,11 @@ Shader "ViSP/Sprite Shader"
 				#endif
 
 				float index = input.uv1.x;
+				float bright = 1;
+
+				#if defined(POINT_BRIGHTNESS)
+				bright = -input.uv1.y;
+				#endif
 
 				#if defined(COLORMAP_REVERSED)
 				index = 1 - index;
@@ -350,10 +370,14 @@ Shader "ViSP/Sprite Shader"
 
 
 
-				color = tex2Dlod(_ColorTex, float4(index, 0.5, 0, 0));
+				color = tex2D(_ColorTex, float4(index, 0.5, 0,0));
+				// color.rgb /= color.a;
+				// color.rgb += _Brightness;
+				// color.rgb *=color.a;
+				//color.w *= 0.2;
 
-
-
+				float4 tmpcolor = (1,1,1, bright);
+			
 
 				if (input.uv2.x > 0) {
 					color = float4(0, 0.5, 0, 1);
@@ -371,7 +395,7 @@ Shader "ViSP/Sprite Shader"
 				//return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color * dis;
 
 				//#else
-				return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color;
+				return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color * tmpcolor;
 				//#endif
 				//return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * input.color;
 			}
