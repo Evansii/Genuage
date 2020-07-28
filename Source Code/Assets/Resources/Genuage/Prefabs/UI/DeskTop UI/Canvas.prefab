@@ -10665,7 +10665,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.34500003}
   m_AnchorMax: {x: 0.164, y: 0.72372454}
-  m_AnchoredPosition: {x: -106.50037, y: 228.16484}
+  m_AnchoredPosition: {x: -106.50049, y: 228.16486}
   m_SizeDelta: {x: -232, y: -930.66986}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4881404119087884364
@@ -27860,6 +27860,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ClippingPlane
       objectReference: {fileID: 0}
+    - target: {fileID: 796651534333917131, guid: dcedd62ec2464b042bf15c0fcddb611b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4902619690376552873, guid: dcedd62ec2464b042bf15c0fcddb611b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -28033,6 +28038,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CameraMove Checkbox
       objectReference: {fileID: 0}
+    - target: {fileID: 6681049028484949799, guid: 550cb35d8eb2e804fb6ef7c59c6034e6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7228098067638842034, guid: 550cb35d8eb2e804fb6ef7c59c6034e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -28157,6 +28167,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Recorder
+      objectReference: {fileID: 0}
+    - target: {fileID: 68038778779642930, guid: e4070d6cdd182cb46afa8f43c425745d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4229012684977645702, guid: e4070d6cdd182cb46afa8f43c425745d,
         type: 3}
