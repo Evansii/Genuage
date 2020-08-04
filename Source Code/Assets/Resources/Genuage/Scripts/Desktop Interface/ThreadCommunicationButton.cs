@@ -104,6 +104,7 @@ namespace DesktopInterface
 
                     if (thread.receive_status == ThreadCommunicator.ReceiveStatus.SUCCESS)
                     {
+                        window.transform.GetChild(0).GetComponent<Text>().text = thread.progressUI;
                         CloudLoader.instance.LoadFromConnection(thread.dataList, thread.SMAPColorField);
                         CloudUpdater.instance.ChangeColorMap(0,thread.SMAPColorMap, false);
                     }
