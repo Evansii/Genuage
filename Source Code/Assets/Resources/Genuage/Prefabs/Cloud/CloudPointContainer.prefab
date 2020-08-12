@@ -59,9 +59,10 @@ GameObject:
   - component: {fileID: 1295486899877164006}
   - component: {fileID: 7995712112047505112}
   - component: {fileID: 5435616000444651303}
-  - component: {fileID: 5730057260139632040}
   - component: {fileID: 7882445701773587003}
   - component: {fileID: 7707402597060869817}
+  - component: {fileID: 2896636976004951195}
+  - component: {fileID: 5149487759201238886}
   m_Layer: 0
   m_Name: CloudPoint
   m_TagString: PointCloud
@@ -77,7 +78,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6177789406996050554}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.347, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2887520844563940610}
@@ -111,6 +112,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -176,24 +178,6 @@ MonoBehaviour:
   objectHighlighter: {fileID: 0}
   touchHighlightColor: {r: 0, g: 0, b: 0, a: 0}
   usingState: 0
---- !u!114 &5730057260139632040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6177789406996050554}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ec2ac476f2fc9a45a4e69712580a603, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  precisionGrab: 1
-  rightSnapHandle: {fileID: 0}
-  leftSnapHandle: {fileID: 0}
-  throwVelocityWithAttachDistance: 0
-  throwMultiplier: 1
-  onGrabCollisionDelay: 0
 --- !u!54 &7882445701773587003
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -222,4 +206,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8870e0ac032bb904788ef9c49997a257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialRot: []
+  isRectTransform: 0
+  indexkey: 0
+  keyframeTimestep: 5
+  timestep: 5
+  animationTime: 0
+  clip: {fileID: 0}
+--- !u!114 &2896636976004951195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6177789406996050554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ec2ac476f2fc9a45a4e69712580a603, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  precisionGrab: 0
+  rightSnapHandle: {fileID: 0}
+  leftSnapHandle: {fileID: 0}
+  throwVelocityWithAttachDistance: 0
+  throwMultiplier: 1
+  onGrabCollisionDelay: 0
+  moveLock: 0
+--- !u!65 &5149487759201238886
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6177789406996050554}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 0.13072234, y: 0.14262915, z: 0.14650625}
+  m_Center: {x: -0.14396045, y: -0.1065855, z: -0.1572378}

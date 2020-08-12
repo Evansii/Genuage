@@ -571,14 +571,37 @@ namespace Data
         }
 
 
-        public override void ChangePointSize(float value)
+        public override void ChangePointSize(float value, bool secondChan = false)
         {
             CloudData currentCloud = LoadCurrentStatus();
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Size", value / 50);
             currentCloud.globalMetaData.point_size = value;
-            Debug.Log("PointSize Changed");
+            //Debug.Log("PointSize Changed");
+
+            if(secondChan)
+            {
+                CloudData chan2 = CloudStorage.instance.table[1];
+                material = chan2.gameObject.GetComponent<MeshRenderer>().material;
+                material.SetFloat("_Size", value / 50);
+                chan2.globalMetaData.point_size = value;
+            }
         }
+
+        //Vincent Casamayou
+        //Update global Brightness setting
+        public void ChangeBrightness(float value)
+        {
+            CloudData currentCloud = LoadCurrentStatus();
+            Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
+            material.SetFloat("_Brightness", value);
+            currentCloud.globalMetaData.point_brightness = value;
+            Debug.Log("Brightness Changed");
+
+
+        }
+
+
 
         #endregion
 

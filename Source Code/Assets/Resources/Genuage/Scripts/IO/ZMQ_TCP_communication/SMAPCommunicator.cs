@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿//Vincent Casamayou
+//SMAP Communicator
+//Last version 12/08/2020
+
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +31,10 @@ namespace IO
 
         public int package_count = 0;
 
+        public int nb_channels;
+
+        public int channels_count = 0;
+
         public bool isLoading = false;
 
         public bool isColorSet = false;
@@ -41,6 +49,7 @@ namespace IO
         public List<float> col_hide;
 
         public Dictionary<string ,string> colorTransition;
+
 
 
         protected override void Run() 
@@ -123,10 +132,26 @@ namespace IO
                         //     return ReceiveStatus.SUCCESS;
                         //     break;
 
+                        case "CH":
+                            GetNumberChannels(client,ns);
+                            Debug.Log("You got "+nb_channels+" channels");
+                            request_type= "";
+                            break;
+
+
                         case "LC":
                             isLoading = false;
                             progressUI = package_count +"/"+nb_packages+" received...";
-                            GetLocData(client,ns);
+                            if(channels_count > 0)
+                            {
+                                dataList_ch2 = GetLocData(client,ns);
+                            }
+                            else
+                            {
+                                dataList = GetLocData(client,ns);
+                            }
+
+                        
                             request_type ="";
                             break;
                         
@@ -171,12 +196,18 @@ namespace IO
                         isColorSet = false;
                         Debug.Log("All Data acquired");
                         progressUI = "All Packages acquired";
-                        return ReceiveStatus.SUCCESS;
+                        channels_count ++;
+                        if (channels_count == nb_channels)
+                        {
+                            return ReceiveStatus.SUCCESS;
+                        }
                     }
 
                 }
             }
         }
+
+
 
         public void SendMovieRequest()
         {
@@ -246,8 +277,10 @@ namespace IO
             
         }
         
-        public void GetLocData(TcpClient client, NetworkStream ns)
+        public List<float[]> GetLocData(TcpClient client, NetworkStream ns)
         {
+            List<float[]> dataset = new List<float[]>();
+
             byte[] bytes = new byte[client.ReceiveBufferSize];
             var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
             var data_to_process = new float[bytes_read/4];
@@ -275,22 +308,32 @@ namespace IO
             isLoading = true;
             if(package_count == nb_packages)
             {
-                dataList.Add(col_x.ToArray());
+                dataset.Add(col_x.ToArray());
                 col_x.Clear();
-                dataList.Add(col_y.ToArray());
+                dataset.Add(col_y.ToArray());
                 col_y.Clear();
-                dataList.Add(col_z.ToArray());
+                dataset.Add(col_z.ToArray());
                 col_z.Clear();
-                dataList.Add(col_pre.ToArray());
+                dataset.Add(col_pre.ToArray());
                 col_pre.Clear();
-                dataList.Add(col_frame.ToArray());
+                dataset.Add(col_frame.ToArray());
                 col_frame.Clear();
-                dataList.Add(col_hide.ToArray());
+                dataset.Add(col_hide.ToArray());
                 col_hide.Clear();
             }
 
+            return dataset;
+
             
             
+        }
+
+
+        public void GetNumberChannels(TcpClient client, NetworkStream ns)
+        {
+            byte[] bytes = new byte[client.ReceiveBufferSize];
+            var bytes_read = ns.Read(bytes,0,(int)client.ReceiveBufferSize);
+            nb_channels = BitConverter.ToInt32(bytes,0);
         }
 
         public void GetNumberPackages(TcpClient client, NetworkStream ns)

@@ -39,7 +39,7 @@ Shader "ViSP/Sprite Shader"
 		_SpriteTex("Texture", 2D) = "white" {}
 		_ColorTex("Texture", 2D) = "white" {}
 
-		_Size("Size", Range(0, 0.05)) = 0.01
+		_Size("Size", Range(0, 0.5)) = 0.01
 		_Brightness("Brightness",Range(0,1)) = 1
 		//_Color("Color", Color) = (.34, .85, .92, 1)
 	}
@@ -395,7 +395,7 @@ Shader "ViSP/Sprite Shader"
 				//return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color * dis;
 
 				//#else
-				return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color * tmpcolor;
+				return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * color * tmpcolor * _Brightness;
 				//#endif
 				//return _SpriteTex.Sample(sampler_SpriteTex, input.uv) * input.color;
 			}

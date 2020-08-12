@@ -125,7 +125,7 @@ namespace IO
 
         }
 
-        public void LoadFromConnection(List<float[]> columnDataList, int SMAPColorField)
+        public void LoadFromConnection(List<float[]> columnDataList, List<float[]> columnDataList_ch2, int SMAPColorField)
         {
             savedata = null;
             window = ModalWindowManager.instance.CreateModalWindow("Loading the cloud, please wait...");
@@ -145,6 +145,13 @@ namespace IO
 
             GameObject cloud = CreateCloudPoint(columnDataList, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
             PutInMemory(cloud);
+            if(columnDataList_ch2.Count > 0)
+            {
+                GameObject cloud_ch2 = CreateCloudPoint(columnDataList_ch2, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
+                PutInMemory(cloud_ch2);
+                Debug.Log(CloudStorage.instance.table[0].columnData.Count);
+            }
+
             Destroy(window);
             CloudSelector.instance.UpdateSelection(cloud.GetComponent<CloudData>().globalMetaData.cloud_id);
 
@@ -1064,6 +1071,7 @@ namespace IO
             root.GetComponent<MeshFilter>().mesh = mesh;
             Debug.Log(indices.Length + " points loaded into cloudData");
             Debug.Log(vertices.Length + " vertices");
+            Debug.Log(root.columnData.Count);
             
         }
     }

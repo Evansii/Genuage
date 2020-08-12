@@ -39,7 +39,7 @@ namespace DesktopInterface
 {
 
 
-    public class PointSizeSlider : SliderScript   
+    public class BrightnessSlider : SliderScript   
     {
         public Transform _text_description;
         
@@ -72,7 +72,7 @@ namespace DesktopInterface
         public void AdjustValue(int selected_id)
         {
             CloudData currentcloud = CloudUpdater.instance.LoadCurrentStatus();
-            slider.value = currentcloud.globalMetaData.point_size;
+            slider.value = currentcloud.globalMetaData.point_brightness;
         }
 
 

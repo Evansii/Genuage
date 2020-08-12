@@ -20,6 +20,9 @@ namespace VRTK.GrabAttachMechanics
     [AddComponentMenu("VRTK/Scripts/Interactions/Interactables/Grab Attach Mechanics/VRTK_ChildOfControllerGrabAttach")]
     public class VRTK_ChildOfControllerGrabAttach : VRTK_BaseGrabAttach
     {
+
+        public bool moveLock = false;
+
         /// <summary>
         /// The StartGrab method sets up the grab attach mechanic as soon as an Interactable Object is grabbed. It is also responsible for creating the joint on the grabbed object.
         /// </summary>
@@ -57,6 +60,7 @@ namespace VRTK.GrabAttachMechanics
 
         protected virtual void SetSnappedObjectPosition(GameObject obj)
         {
+
             if (grabbedSnapHandle == null)
             {
                 obj.transform.position = controllerAttachPoint.transform.position;
@@ -66,15 +70,19 @@ namespace VRTK.GrabAttachMechanics
                 obj.transform.rotation = controllerAttachPoint.transform.rotation * Quaternion.Inverse(grabbedSnapHandle.transform.localRotation);
                 obj.transform.position = controllerAttachPoint.transform.position - (grabbedSnapHandle.transform.position - obj.transform.position);
             }
+
         }
 
         protected virtual void SnapObjectToGrabToController(GameObject obj)
         {
-            if (!precisionGrab)
+            if(moveLock == false)
             {
-                SetSnappedObjectPosition(obj);
+                if (!precisionGrab)
+                {
+                    SetSnappedObjectPosition(obj);
+                }
+                obj.transform.SetParent(controllerAttachPoint.transform);
             }
-            obj.transform.SetParent(controllerAttachPoint.transform);
         }
     }
 }

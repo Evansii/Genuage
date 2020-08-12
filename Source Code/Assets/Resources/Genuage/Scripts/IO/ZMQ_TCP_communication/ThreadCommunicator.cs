@@ -43,6 +43,7 @@ namespace IO
     public abstract class ThreadCommunicator : RunnableThread
     {
         public List<float[]> dataList;
+        public List<float[]> dataList_ch2;
         public string progressUI;
         public ReceiveStatus receive_status;
 

@@ -2,6 +2,9 @@
 namespace VRTK.SecondaryControllerGrabActions
 {
     using UnityEngine;
+    using UnityEngine.UI;
+    using Data;
+    using VRTK.GrabAttachMechanics;
 
     /// <summary>
     /// Scales the grabbed Interactable Object along the given axes based on the position of the secondary grabbing Interact Grab.
@@ -19,11 +22,23 @@ namespace VRTK.SecondaryControllerGrabActions
     public class VRTK_AxisScaleGrabAction : VRTK_BaseGrabAction
     {
         [Tooltip("The distance the secondary grabbing object must move away from the original grab position before the secondary grabbing object auto ungrabs the Interactable Object.")]
-        public float ungrabDistance = 1f;
+        public float ungrabDistance = 10f;
         [Tooltip("Locks the specified checked axes so they won't be scaled")]
         public Vector3State lockAxis = Vector3State.False;
         [Tooltip("If checked all the axes will be scaled together (unless locked)")]
         public bool uniformScaling = false;
+
+        public GameObject additionalObjectToScale;
+        public GameObject channel2toScale;
+        public GameObject channel2toScale_cloud;
+        CloudData data;
+        Vector3 newScale;
+        Vector3 finalScale;
+        
+        Vector3 currentScale;
+        public bool grabchan = false; 
+        public float scale_strength =1.5f;
+        public Quaternion relativeRotation;
 
         [Header("Obsolete Settings")]
 
@@ -52,9 +67,16 @@ namespace VRTK.SecondaryControllerGrabActions
         public override void Initialise(VRTK_InteractableObject currentGrabbdObject, VRTK_InteractGrab currentPrimaryGrabbingObject, VRTK_InteractGrab currentSecondaryGrabbingObject, Transform primaryGrabPoint, Transform secondaryGrabPoint)
         {
             base.Initialise(currentGrabbdObject, currentPrimaryGrabbingObject, currentSecondaryGrabbingObject, primaryGrabPoint, secondaryGrabPoint);
-            initialScale = currentGrabbdObject.transform.localScale;
+            data = CloudUpdater.instance.LoadCurrentStatus();
+            currentGrabbdObject = GameObject.Find("CloudPoint").GetComponent<VRTK_InteractableObject>();
+            initialScale = grabbedObject.transform.parent.localScale;
             initalLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
-            initialScaleFactor = currentGrabbdObject.transform.localScale.x / initalLength;
+            initialScaleFactor = (currentGrabbdObject.transform.parent.localScale.x / initalLength);
+            grabbedObject = GameObject.Find("CloudPoint").GetComponent<VRTK_InteractableObject>();
+            channel2toScale = grabbedObject.transform.GetChild(2).gameObject;
+            relativeRotation = Quaternion.Inverse(additionalObjectToScale.transform.rotation) * grabbedObject.transform.parent.rotation;
+            //this.gameObject.GetComponent<VRTK_ChildOfControllerGrabAttach>().moveLock = true;
+
 
 #pragma warning disable 618
             if ((lockXAxis || lockYAxis || lockZAxis) && lockAxis == Vector3State.False)
@@ -92,17 +114,44 @@ namespace VRTK.SecondaryControllerGrabActions
             }
         }
 
-        protected virtual void ApplyScale(Vector3 newScale)
+        protected virtual void ApplyScale(Vector3 newScale, GameObject box = null)
         {
-            Vector3 existingScale = grabbedObject.transform.localScale;
+            Vector3 existingScale = grabbedObject.transform.parent.localScale;
 
             float finalScaleX = (lockAxis.xState ? existingScale.x : newScale.x);
             float finalScaleY = (lockAxis.yState ? existingScale.y : newScale.y);
             float finalScaleZ = (lockAxis.zState ? existingScale.z : newScale.z);
 
+            finalScale = new Vector3(finalScaleX, finalScaleY, finalScaleZ);
             if (finalScaleX > 0 && finalScaleY > 0 && finalScaleZ > 0)
             {
-                grabbedObject.transform.localScale = new Vector3(finalScaleX, finalScaleY, finalScaleZ); ;
+
+                if(box)
+                {
+                    box.transform.localScale = new Vector3(finalScaleX, finalScaleY*0.9985481f, finalScaleZ*0.2135878f);
+                }
+                if(!grabchan)
+                {
+                    channel2toScale = grabbedObject.transform.parent.transform.GetChild(1).gameObject;
+                    channel2toScale_cloud = channel2toScale.transform.GetChild(0).gameObject;
+                    grabchan = true;
+                }
+                grabbedObject.transform.parent.localScale = finalScale;
+                
+                grabbedObject.transform.position = box.transform.position;
+                channel2toScale_cloud.transform.position = box.transform.position;
+
+
+                grabbedObject.transform.parent.rotation = box.transform.rotation * relativeRotation;
+
+    
+                //channel2toScale.transform.localScale = finalScale;
+                //channel2toScale.transform.rotation = box.transform.rotation * relativeRotation;
+
+                currentScale = finalScale;
+                
+                CloudUpdater.instance.ChangePointSize(finalScaleX, true);
+
             }
         }
 
@@ -116,17 +165,17 @@ namespace VRTK.SecondaryControllerGrabActions
             float newScaleY = CalculateAxisScale(initialRotatedPosition.y, initialSecondGrabRotatedPosition.y, currentSecondGrabRotatedPosition.y);
             float newScaleZ = CalculateAxisScale(initialRotatedPosition.z, initialSecondGrabRotatedPosition.z, currentSecondGrabRotatedPosition.z);
 
-            Vector3 newScale = new Vector3(newScaleX, newScaleY, newScaleZ) + initialScale;
-            ApplyScale(newScale);
+            newScale = new Vector3(newScaleX, newScaleY, newScaleZ) + initialScale;
+            ApplyScale(newScale, additionalObjectToScale);
         }
 
         protected virtual void UniformScale()
         {
-            float adjustedLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
-            float adjustedScale = initialScaleFactor * adjustedLength;
+            float adjustedLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position*scale_strength ).magnitude ;
+            float adjustedScale = initialScaleFactor * adjustedLength ;
 
-            Vector3 newScale = new Vector3(adjustedScale, adjustedScale, adjustedScale);
-            ApplyScale(newScale);
+            newScale = new Vector3(adjustedScale, adjustedScale, adjustedScale);
+            ApplyScale(newScale, additionalObjectToScale);
         }
 
         protected virtual float CalculateAxisScale(float centerPosition, float initialPosition, float currentPosition)
@@ -134,6 +183,18 @@ namespace VRTK.SecondaryControllerGrabActions
             float distance = currentPosition - initialPosition;
             distance = (centerPosition < initialPosition ? distance : -distance);
             return distance;
+        }
+
+        public override void ResetAction()
+        {
+            //grabbedObject.transform.localScale = Vector3.one;
+            base.ResetAction();
+
+            Debug.Log(finalScale.x);
+            CloudUpdater.instance.ChangeCloudScale(finalScale);
+
+            
+
         }
     }
 }

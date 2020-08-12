@@ -98,6 +98,9 @@ namespace DesktopInterface
                 headerList = new List<GameObject>();
                 selectionList = new List<int>();
                 collumnnbr = selectedCloud.columnData.Count;
+                Debug.Log(selectedCloud.columnData.Count);
+                Debug.Log(selectedCloud.globalMetaData.cloud_id);
+                Debug.Log(CloudStorage.instance.table[0].columnData.Count);
                 for (int i = 0; i < VARIABLENUMBER; i++)
                 {
                     toggleList.Add(new List<GameObject>());
@@ -192,7 +195,7 @@ namespace DesktopInterface
                     i++;
                 }
             }
-            InitializeToggles();
+            //InitializeToggles();
         }
 
         public void InitializeToggles()

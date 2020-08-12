@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VRTK;
 using VRTK.GrabAttachMechanics;
+using VRTK.SecondaryControllerGrabActions;
 using Data;
 using DesktopInterface;
 /// <summary>
@@ -90,7 +91,7 @@ public class CloudBox : MonoBehaviour
         _box.transform.SetParent(transform.parent,false);
         CreateBox();
         AddFollowComponents(this.gameObject, _box);
-        AddDraggableComponents(_box);
+        AddDraggableComponents(_box, GameObject.Find("CloudPoint"));
         transform.parent.GetComponent<CloudObjectRefference>().box = _box;
 
         //Clipping Planes Initialization
@@ -105,7 +106,7 @@ public class CloudBox : MonoBehaviour
 
     }
 
-    private void AddDraggableComponents(GameObject go)
+    private void AddDraggableComponents(GameObject go, GameObject cloud)
     {
         go.AddComponent<Rigidbody>().useGravity = false;
         go.GetComponent<Rigidbody>().isKinematic = true;
@@ -114,7 +115,10 @@ public class CloudBox : MonoBehaviour
         go.GetComponent<BoxCollider>().size = Vector3.one;
         go.AddComponent<VRTK_InteractableObject>().isGrabbable = true;
         go.AddComponent<VRTK_ChildOfControllerGrabAttach>().precisionGrab = true;
+        go.AddComponent<VRTK_AxisScaleGrabAction>().uniformScaling = true;
+        go.GetComponent<VRTK_AxisScaleGrabAction>().additionalObjectToScale = go;
         go.GetComponent<VRTK_InteractableObject>().grabAttachMechanicScript = go.GetComponent<VRTK_ChildOfControllerGrabAttach>();
+        go.GetComponent<VRTK_InteractableObject>().secondaryGrabActionScript = go.GetComponent<VRTK_AxisScaleGrabAction>();
         go.GetComponent<VRTK_InteractableObject>().InteractableObjectTouched += Hovered;
         go.GetComponent<VRTK_InteractableObject>().InteractableObjectUntouched += Unhovered;
         go.GetComponent<VRTK_InteractableObject>().InteractableObjectGrabbed += Grabbed;

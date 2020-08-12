@@ -105,8 +105,11 @@ namespace DesktopInterface
                     if (thread.receive_status == ThreadCommunicator.ReceiveStatus.SUCCESS)
                     {
                         window.transform.GetChild(0).GetComponent<Text>().text = thread.progressUI;
-                        CloudLoader.instance.LoadFromConnection(thread.dataList, thread.SMAPColorField);
+                        CloudLoader.instance.LoadFromConnection(thread.dataList, thread.dataList_ch2, thread.SMAPColorField);
                         CloudUpdater.instance.ChangeColorMap(0,thread.SMAPColorMap, false);
+
+                        //thread.dataList.Clear();
+                        //thread.dataList_ch2.Clear();
                     }
 
                     if (thread.receive_status == ThreadCommunicator.ReceiveStatus.TIMEOUT)

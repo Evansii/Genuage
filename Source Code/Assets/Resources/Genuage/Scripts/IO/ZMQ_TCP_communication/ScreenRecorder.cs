@@ -103,9 +103,9 @@ public class ScreenRecorder : MonoBehaviour
 		Application.targetFrameRate = frameRate;
 
 		// Prepare the data directory
-		persistentDataPath = Application.persistentDataPath + "/ScreenRecorder";
+		persistentDataPath = Application.dataPath + "/Records";
 
-		ffmpath = Environment.CurrentDirectory+@"\FFMPEG/bin\ffmpeg.exe";
+		ffmpath = Application.dataPath+@"/FFMPEG/bin\ffmpeg.exe";
 		print(ffmpath);
 
 		print ("Capturing to: " + persistentDataPath + "/");
@@ -257,7 +257,7 @@ public class ScreenRecorder : MonoBehaviour
 		isVideoReady = true;
 
 		print ("SCREENRECORDER IO THREAD FINISHED");
-		string commandline = "-i frame%d.bmp "+outputname+".mp4";
+		string commandline = "-i frame%d.bmp "+outputname+".avi";
 
 		var proc = new Process
 		{

@@ -251,7 +251,10 @@ namespace Data
     {
         private int _cloud_id;
         private Vector3 _scale;
+        
         private float _point_size;
+
+        private float _point_brightness;
         //private float _depth;
         private float _xMax, _xMin; // x position
         private float _yMax, _yMin; // y position
@@ -376,6 +379,13 @@ namespace Data
         {
             get { return _colormapName; }
             set { _colormapName = value; }
+        }
+
+        // Vincent Casamayou - BRIGHTNESS
+        public float point_brightness
+        {
+            get { return _point_brightness; }
+            set { _point_brightness = value; }
         }
 
         public float point_size

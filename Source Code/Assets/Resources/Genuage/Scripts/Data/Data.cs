@@ -83,7 +83,7 @@ namespace Data
         #endregion
 
         #region point_size
-        public abstract void ChangePointSize(float value);
+        public abstract void ChangePointSize(float value, bool secondChan = false);
         #endregion
 
         #region link_clouds
