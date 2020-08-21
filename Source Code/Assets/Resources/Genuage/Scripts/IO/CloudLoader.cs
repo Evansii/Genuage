@@ -36,6 +36,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations;
 using VR_Interaction;
@@ -145,7 +146,7 @@ namespace IO
 
             GameObject cloud = CreateCloudPoint(columnDataList, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
             PutInMemory(cloud);
-            if(columnDataList_ch2.Count > 0)
+            if(columnDataList_ch2.Any())
             {
                 GameObject cloud_ch2 = CreateCloudPoint(columnDataList_ch2, SMAPcolorcolumn : SMAPColorField, isSMAP : true);
                 PutInMemory(cloud_ch2);

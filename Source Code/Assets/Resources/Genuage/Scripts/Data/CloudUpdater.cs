@@ -37,6 +37,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using VRTK;
+using VRTK.SecondaryControllerGrabActions;
 using Unity.Jobs;
 using Unity.Collections;
 using VR_Interaction;
@@ -575,28 +576,44 @@ namespace Data
         {
             CloudData currentCloud = LoadCurrentStatus();
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
-            material.SetFloat("_Size", value / 50);
+            material.SetFloat("_Size", value / 5);
             currentCloud.globalMetaData.point_size = value;
             //Debug.Log("PointSize Changed");
 
             if(secondChan)
-            {
+            {    
                 CloudData chan2 = CloudStorage.instance.table[1];
+                if(chan2.globalMetaData.cloud_id == currentCloud.globalMetaData.cloud_id)
+                {
+                    chan2 = CloudStorage.instance.table[0];
+                }
                 material = chan2.gameObject.GetComponent<MeshRenderer>().material;
-                material.SetFloat("_Size", value / 50);
+                material.SetFloat("_Size", value / 10);
                 chan2.globalMetaData.point_size = value;
             }
         }
 
         //Vincent Casamayou
         //Update global Brightness setting
-        public void ChangeBrightness(float value)
+        public void ChangeBrightness(float value, bool secondChan = false)
         {
             CloudData currentCloud = LoadCurrentStatus();
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Brightness", value);
             currentCloud.globalMetaData.point_brightness = value;
             Debug.Log("Brightness Changed");
+
+              if(secondChan)
+            {
+                CloudData chan2 = CloudStorage.instance.table[1];
+                if(chan2.globalMetaData.cloud_id == currentCloud.globalMetaData.cloud_id)
+                {
+                    chan2 = CloudStorage.instance.table[0];
+                }
+                material = chan2.gameObject.GetComponent<MeshRenderer>().material;
+                material.SetFloat("_Brightness", value);
+                chan2.globalMetaData.point_brightness = value;
+            }
 
 
         }
@@ -865,6 +882,7 @@ namespace Data
                     currcloud.transform.parent.SetParent(LoadStatus(cloudIDList[0]).transform.parent);
                     currcloud.GetComponent<VRTK_RigidbodyFollow>().gameObjectToFollow = LoadStatus(cloudIDList[0]).gameObject;
                     currcloud.transform.parent.Find("Box").gameObject.SetActive(false);
+                    LoadStatus(cloudIDList[0]).transform.parent.Find("Box").GetComponent<VRTK_AxisScaleGrabAction>().isLinked = true;
                 }
 
             }
@@ -897,6 +915,7 @@ namespace Data
                 }
                 box.SetActive(true);
                 currcloud.GetComponent<VRTK_RigidbodyFollow>().gameObjectToFollow = box;
+                LoadStatus(cloudIDList[0]).transform.parent.Find("Box").GetComponent<VRTK_AxisScaleGrabAction>().isLinked = false;
 
 
             }

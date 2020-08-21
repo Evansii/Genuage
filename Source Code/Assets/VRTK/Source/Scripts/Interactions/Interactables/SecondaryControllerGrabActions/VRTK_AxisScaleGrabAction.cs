@@ -36,7 +36,8 @@ namespace VRTK.SecondaryControllerGrabActions
         Vector3 finalScale;
         
         Vector3 currentScale;
-        public bool grabchan = false; 
+        public bool grabchan = false;
+        public bool isLinked = false;
         public float scale_strength =1.5f;
         public Quaternion relativeRotation;
 
@@ -73,7 +74,6 @@ namespace VRTK.SecondaryControllerGrabActions
             initalLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
             initialScaleFactor = (currentGrabbdObject.transform.parent.localScale.x / initalLength);
             grabbedObject = GameObject.Find("CloudPoint").GetComponent<VRTK_InteractableObject>();
-            channel2toScale = grabbedObject.transform.GetChild(2).gameObject;
             relativeRotation = Quaternion.Inverse(additionalObjectToScale.transform.rotation) * grabbedObject.transform.parent.rotation;
             //this.gameObject.GetComponent<VRTK_ChildOfControllerGrabAttach>().moveLock = true;
 
@@ -130,16 +130,15 @@ namespace VRTK.SecondaryControllerGrabActions
                 {
                     box.transform.localScale = new Vector3(finalScaleX, finalScaleY*0.9985481f, finalScaleZ*0.2135878f);
                 }
-                if(!grabchan)
-                {
+                if(!grabchan && isLinked)
+                { 
                     channel2toScale = grabbedObject.transform.parent.transform.GetChild(1).gameObject;
                     channel2toScale_cloud = channel2toScale.transform.GetChild(0).gameObject;
                     grabchan = true;
                 }
                 grabbedObject.transform.parent.localScale = finalScale;
-                
+
                 grabbedObject.transform.position = box.transform.position;
-                channel2toScale_cloud.transform.position = box.transform.position;
 
 
                 grabbedObject.transform.parent.rotation = box.transform.rotation * relativeRotation;
@@ -149,8 +148,21 @@ namespace VRTK.SecondaryControllerGrabActions
                 //channel2toScale.transform.rotation = box.transform.rotation * relativeRotation;
 
                 currentScale = finalScale;
-                
-                CloudUpdater.instance.ChangePointSize(finalScaleX, true);
+                if(channel2toScale)
+                {
+                    CloudUpdater.instance.ChangePointSize(finalScaleX/10, true);
+                    CloudUpdater.instance.ChangeBrightness(finalScaleX, true);
+                    
+                    
+                    channel2toScale_cloud.transform.position = box.transform.position;
+                    
+                }
+                else
+                {
+                    CloudUpdater.instance.ChangePointSize(finalScaleX/10, false);
+                    CloudUpdater.instance.ChangeBrightness(finalScaleX, false);
+
+                }
 
             }
         }

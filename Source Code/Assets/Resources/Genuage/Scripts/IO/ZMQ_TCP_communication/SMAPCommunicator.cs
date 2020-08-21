@@ -56,6 +56,7 @@ namespace IO
         {
 
             dataList = new List<float[]>();
+            dataList_ch2 = new List<float[]>();
             
             col_x = new List<float>();
             col_y = new List<float>();

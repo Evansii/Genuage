@@ -257,7 +257,7 @@ public class ScreenRecorder : MonoBehaviour
 		isVideoReady = true;
 
 		print ("SCREENRECORDER IO THREAD FINISHED");
-		string commandline = "-i frame%d.bmp "+outputname+".avi";
+		string commandline = "-s 1920x1080 -i frame%d.bmp -crf 25 "+outputname+".mp4";
 
 		var proc = new Process
 		{

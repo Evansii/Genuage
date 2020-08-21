@@ -6716,7 +6716,7 @@ GameObject:
   - component: {fileID: 2025459810323835926}
   - component: {fileID: 7937750981864404757}
   - component: {fileID: 492716497068108251}
-  - component: {fileID: 921347055685003095}
+  - component: {fileID: 3348295700673511928}
   m_Layer: 5
   m_Name: Slider
   m_TagString: Untagged
@@ -6790,9 +6790,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3628114406951748251}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 0.5
   m_WholeNumbers: 0
-  m_Value: 1
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -6816,7 +6816,7 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!114 &921347055685003095
+--- !u!114 &3348295700673511928
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6825,7 +6825,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2851787713340702360}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac20f1496df258b4cb0060acef721aa4, type: 3}
+  m_Script: {fileID: 11500000, guid: 76bca79863ae68643bd387ff8249b520, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   slider: {fileID: 0}
@@ -11075,7 +11075,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.34500003}
   m_AnchorMax: {x: 0.164, y: 0.72372454}
-  m_AnchoredPosition: {x: -106.499756, y: 228.16484}
+  m_AnchoredPosition: {x: -106.49902, y: 228.16486}
   m_SizeDelta: {x: -232, y: -930.66986}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4881404119087884364
@@ -12012,7 +12012,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5181486669504169648}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -12}
+  m_LocalPosition: {x: 0, y: 0, z: -28}
   m_LocalScale: {x: 1.5899998, y: 2.9299994, z: 1}
   m_Children: []
   m_Father: {fileID: 6113921262690118414}
@@ -12020,7 +12020,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -309.4, y: -32}
+  m_AnchoredPosition: {x: -309.4, y: -16}
   m_SizeDelta: {x: 98.42, y: 43.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1388120248639020700
@@ -16309,9 +16309,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 6113921261774175123}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 0.3
   m_WholeNumbers: 0
-  m_Value: 1
+  m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -28311,12 +28311,12 @@ PrefabInstance:
     - target: {fileID: 4902619690376552873, guid: dcedd62ec2464b042bf15c0fcddb611b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -124.8999
+      value: -128
       objectReference: {fileID: 0}
     - target: {fileID: 4902619690376552873, guid: dcedd62ec2464b042bf15c0fcddb611b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -468.25
+      value: -476
       objectReference: {fileID: 0}
     - target: {fileID: 4902619690376552873, guid: dcedd62ec2464b042bf15c0fcddb611b,
         type: 3}

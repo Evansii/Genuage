@@ -12,8 +12,9 @@ using UnityEngine;
 
 public class SMAPCameraMovement : MonoBehaviour
 {
-    public float moveSpeed = 0.01f;
+    public float moveSpeed = 0.005f;
     public float rotationSpeed = 1f;
+    public bool faster = true;
 
     
     
@@ -36,6 +37,12 @@ public class SMAPCameraMovement : MonoBehaviour
         
         if(Input.GetKey(KeyCode.RightArrow))
             this.gameObject.transform.Translate(Vector3.right*moveSpeed);
+
+        if(Input.GetKey(KeyCode.U))
+            this.gameObject.transform.Translate(Vector3.up*moveSpeed);
+
+        if(Input.GetKey(KeyCode.J))
+            this.gameObject.transform.Translate(Vector3.down*moveSpeed);    
     }
 
     public void UpdateRotation()
@@ -63,10 +70,26 @@ public class SMAPCameraMovement : MonoBehaviour
         this.gameObject.transform.position = new Vector3(0,0,-2);
         this.gameObject.transform.localEulerAngles = Vector3.zero;
     }
+    
+    public void FastSpeed()
+    {  
+        if(!faster)
+        {
+            moveSpeed = 0.005f;
+            faster = true;
+        }
+        else if(faster)
+        {
+            moveSpeed = 0.0005f;
+            faster = false;
+        }
+    }
 
+
+    
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {   
         if(!Input.GetKey(KeyCode.LeftControl))
         {
@@ -78,6 +101,12 @@ public class SMAPCameraMovement : MonoBehaviour
         if(Input.GetKey(KeyCode.R))
             ResetPosition();
         
+
+        if(Input.GetKey(KeyCode.P))
+        {
+            FastSpeed();
+        }
+
     }
 
 

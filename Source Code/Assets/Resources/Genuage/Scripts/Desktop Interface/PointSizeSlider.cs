@@ -58,8 +58,7 @@ namespace DesktopInterface
 
         public override void Execute(float value)
         {
-            CloudUpdater.instance.ChangeBrightness(slider.value);
-
+            CloudUpdater.instance.ChangePointSize(slider.value);
 
             if (_field)
             {

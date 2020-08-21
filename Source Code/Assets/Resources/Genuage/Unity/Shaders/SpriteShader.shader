@@ -39,7 +39,7 @@ Shader "ViSP/Sprite Shader"
 		_SpriteTex("Texture", 2D) = "white" {}
 		_ColorTex("Texture", 2D) = "white" {}
 
-		_Size("Size", Range(0, 0.5)) = 0.01
+		_Size("Size", Range(0, 0.1)) = 0.01
 		_Brightness("Brightness",Range(0,1)) = 1
 		//_Color("Color", Color) = (.34, .85, .92, 1)
 	}
@@ -55,7 +55,7 @@ Shader "ViSP/Sprite Shader"
 			LOD 200
 
 			CGPROGRAM
-			#pragma target 5.0
+			#pragma target gl4.1
 			#pragma vertex vertex_shader
 			#pragma fragment fragment_shader
 			#pragma geometry geometry_shader

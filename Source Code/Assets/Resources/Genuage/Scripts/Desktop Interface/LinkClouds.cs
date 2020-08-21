@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Data;
+using VRTK.SecondaryControllerGrabActions;
 
 namespace DesktopInterface
 {

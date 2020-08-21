@@ -195,7 +195,7 @@ namespace DesktopInterface
                     i++;
                 }
             }
-            //InitializeToggles();
+            InitializeToggles();
         }
 
         public void InitializeToggles()
