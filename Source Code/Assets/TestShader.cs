@@ -8,6 +8,7 @@ public class TestShader : MonoBehaviour
     public List<int> indices;
     public List<Color> colors;
     public List<Vector2> uv;
+    public bool test;
 
     private void Awake()
     {

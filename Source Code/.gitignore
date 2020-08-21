@@ -35,3 +35,9 @@ sysinfo.txt
 # Builds
 Source Code/*.apk
 Source Code/*.unitypackage
+
+#Cache
+Source Code/Library/
+Source Code/Packages/
+Source Code/Logs/
+Source Code/Temp/
