@@ -38,7 +38,7 @@ using UnityEngine.Animations;
 using VRTK;
 using VRTK.GrabAttachMechanics;
 using Data;
-using UnityEngine.PlayerLoop;
+//using UnityEngine.PlayerLoop;
 
 namespace VR_Interaction
 {
