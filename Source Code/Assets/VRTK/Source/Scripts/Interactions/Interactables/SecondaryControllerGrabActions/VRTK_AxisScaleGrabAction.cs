@@ -128,14 +128,17 @@ namespace VRTK.SecondaryControllerGrabActions
 
                 if(box)
                 {
-                    box.transform.localScale = new Vector3(finalScaleX, finalScaleY*0.9985481f, finalScaleZ*0.2135878f);
+                    //box.transform.localScale = new Vector3(finalScaleX, finalScaleY*0.9985481f, finalScaleZ*0.2135878f);
                 }
                 if(!grabchan && isLinked)
-                { 
+                {
+                    Debug.Log("Second Channel Catch");
                     channel2toScale = grabbedObject.transform.parent.transform.GetChild(1).gameObject;
                     channel2toScale_cloud = channel2toScale.transform.GetChild(0).gameObject;
                     grabchan = true;
                 }
+                additionalObjectToScale.transform.SetParent(grabbedObject.transform.parent.transform);
+
                 grabbedObject.transform.parent.localScale = finalScale;
 
                 grabbedObject.transform.position = box.transform.position;
@@ -148,9 +151,10 @@ namespace VRTK.SecondaryControllerGrabActions
                 //channel2toScale.transform.rotation = box.transform.rotation * relativeRotation;
 
                 currentScale = finalScale;
+                Debug.Log(finalScaleX/5);
                 if(channel2toScale)
                 {
-                    CloudUpdater.instance.ChangePointSize(finalScaleX/10, true);
+                    CloudUpdater.instance.ChangePointSize(finalScaleX, true);
                     CloudUpdater.instance.ChangeBrightness(finalScaleX, true);
                     
                     
@@ -159,9 +163,8 @@ namespace VRTK.SecondaryControllerGrabActions
                 }
                 else
                 {
-                    CloudUpdater.instance.ChangePointSize(finalScaleX/10, false);
-                    CloudUpdater.instance.ChangeBrightness(finalScaleX, false);
-
+                    CloudUpdater.instance.ChangePointSize(finalScaleX/5, false); 
+                    CloudUpdater.instance.ChangeBrightness(finalScaleX/5, false);
                 }
 
             }
@@ -183,7 +186,7 @@ namespace VRTK.SecondaryControllerGrabActions
 
         protected virtual void UniformScale()
         {
-            float adjustedLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position*scale_strength ).magnitude ;
+            float adjustedLength = (grabbedObject.transform.position - secondaryGrabbingObject.transform.position).magnitude ;
             float adjustedScale = initialScaleFactor * adjustedLength ;
 
             newScale = new Vector3(adjustedScale, adjustedScale, adjustedScale);

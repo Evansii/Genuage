@@ -1166,7 +1166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeda6d41317f444b900e374895f14e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoPopulateObjectReferences: 1
+  autoPopulateObjectReferences: 0
   actualBoundaries: {fileID: 7633168287903335138}
   actualHeadset: {fileID: 7633168287903357512}
   actualLeftController: {fileID: 7633168287903423412}
@@ -1299,9 +1299,10 @@ Camera:
   m_ClearFlags: 4
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0.019607844}
   m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_GateFitMode: 2
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -1480,6 +1481,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -1640,9 +1642,10 @@ Camera:
   m_ClearFlags: 2
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0.019607844}
   m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_GateFitMode: 2
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -1722,7 +1725,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7633168287903547368
 Transform:
   m_ObjectHideFlags: 0
@@ -1836,11 +1839,8 @@ GameObject:
   - component: {fileID: 7633168288323603705}
   - component: {fileID: 7633168288323603704}
   - component: {fileID: 7633168288323603706}
-  - component: {fileID: 7633168288323603707}
   - component: {fileID: 6007062710518548835}
   - component: {fileID: 569322530965114225}
-  - component: {fileID: 7449910724439198010}
-  - component: {fileID: 2262784130948324598}
   m_Layer: 0
   m_Name: RightController
   m_TagString: Untagged
@@ -2066,20 +2066,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e27ca813600df744aadaaa31204aec8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _current_tool: {fileID: 2262784130948324598}
-  _tool_state: 0
---- !u!114 &7633168288323603707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7633168288323603696}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 089d0c58e8e42f54b9dece21b54f6161, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  selectionPointer: {fileID: 0}
+  selectionSphere: {fileID: 0}
+  selectionConvexHull: {fileID: 0}
+  freeselection: {fileID: 0}
+  counter: {fileID: 0}
+  measureDistance: {fileID: 0}
+  clippingPlane: {fileID: 0}
+  multiclippingPlane: {fileID: 0}
+  anglemeasure: {fileID: 0}
+  histogram: {fileID: 0}
+  _current_tools: []
+  toolMenuPrefab: {fileID: 0}
 --- !u!114 &6007062710518548835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2109,30 +2107,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 3
---- !u!114 &7449910724439198010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7633168288323603696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f2693c2452856f4f9af0fff05c5c39f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2262784130948324598
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7633168288323603696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f0f201f54c90794abebdeb034a55214, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &7633168288375738362
 GameObject:
   m_ObjectHideFlags: 0
@@ -2228,8 +2202,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoManageScriptDefines: 1
   activeScriptingDefineSymbolsWithoutSDKClasses: []
-  scriptAliasLeftController: {fileID: 7633168288945791053}
-  scriptAliasRightController: {fileID: 7633168288323603696}
+  scriptAliasLeftController: {fileID: 0}
+  scriptAliasRightController: {fileID: 0}
   autoManageVRSettings: 1
   autoLoadSetup: 1
   setups:
@@ -2265,7 +2239,6 @@ GameObject:
   - component: {fileID: 7633168288945791050}
   - component: {fileID: 7633168288945791061}
   - component: {fileID: 7633168288945791063}
-  - component: {fileID: 7633168288945791060}
   m_Layer: 0
   m_Name: LeftController
   m_TagString: Untagged
@@ -2489,20 +2462,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e27ca813600df744aadaaa31204aec8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _current_tool: {fileID: 7633168288945791060}
-  _tool_state: 0
---- !u!114 &7633168288945791060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7633168288945791053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 089d0c58e8e42f54b9dece21b54f6161, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  selectionPointer: {fileID: 0}
+  selectionSphere: {fileID: 0}
+  selectionConvexHull: {fileID: 0}
+  freeselection: {fileID: 0}
+  counter: {fileID: 0}
+  measureDistance: {fileID: 0}
+  clippingPlane: {fileID: 0}
+  multiclippingPlane: {fileID: 0}
+  anglemeasure: {fileID: 0}
+  histogram: {fileID: 0}
+  _current_tools: []
+  toolMenuPrefab: {fileID: 0}
 --- !u!1 &7829838292347589690
 GameObject:
   m_ObjectHideFlags: 0

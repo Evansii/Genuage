@@ -581,8 +581,8 @@ namespace Data
         {
             CloudData currentCloud = LoadCurrentStatus();
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
-            material.SetFloat("_Size", value / 5);
-            currentCloud.globalMetaData.point_size = value;
+            material.SetFloat("_Size", value/10);
+            currentCloud.globalMetaData.point_size = value/10;
             //Debug.Log("PointSize Changed");
 
             if(secondChan)
@@ -593,7 +593,7 @@ namespace Data
                     chan2 = CloudStorage.instance.table[0];
                 }
                 material = chan2.gameObject.GetComponent<MeshRenderer>().material;
-                material.SetFloat("_Size", value / 10);
+                material.SetFloat("_Size", value);
                 chan2.globalMetaData.point_size = value;
             }
         }
@@ -616,8 +616,8 @@ namespace Data
                     chan2 = CloudStorage.instance.table[0];
                 }
                 material = chan2.gameObject.GetComponent<MeshRenderer>().material;
-                material.SetFloat("_Brightness", value);
-                chan2.globalMetaData.point_brightness = value;
+                material.SetFloat("_Brightness", value/10);
+                chan2.globalMetaData.point_brightness = value/10;
             }
 
 
