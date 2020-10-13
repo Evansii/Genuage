@@ -582,7 +582,7 @@ namespace Data
             CloudData currentCloud = LoadCurrentStatus();
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Size", value/10);
-            currentCloud.globalMetaData.point_size = value/10;
+            currentCloud.globalMetaData.point_size = value;
             //Debug.Log("PointSize Changed");
 
             if(secondChan)
