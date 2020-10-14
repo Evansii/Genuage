@@ -1073,6 +1073,7 @@ namespace IO
             Debug.Log(indices.Length + " points loaded into cloudData");
             Debug.Log(vertices.Length + " vertices");
             Debug.Log(root.columnData.Count);
+            root.globalMetaData.point_brightness = 0.3f;
             
         }
     }

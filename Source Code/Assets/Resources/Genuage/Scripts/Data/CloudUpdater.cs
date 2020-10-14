@@ -583,7 +583,6 @@ namespace Data
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Size", value/10);
             currentCloud.globalMetaData.point_size = value;
-            //Debug.Log("PointSize Changed");
 
             if(secondChan)
             {    
@@ -606,7 +605,6 @@ namespace Data
             Material material = currentCloud.gameObject.GetComponent<MeshRenderer>().material;
             material.SetFloat("_Brightness", value);
             currentCloud.globalMetaData.point_brightness = value;
-            Debug.Log("Brightness Changed");
 
               if(secondChan)
             {

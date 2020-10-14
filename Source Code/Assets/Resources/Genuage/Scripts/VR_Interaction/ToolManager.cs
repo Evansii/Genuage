@@ -77,9 +77,11 @@ namespace VR_Interaction
         VRTK_ControllerEvents _controller;
         public GameObject toolMenuPrefab;
         private GameObject menu = null;
+        public VRScaleControl scaleControl;
 
         public void Awake()
         {
+            scaleControl = GetComponent<VRScaleControl>();
             _controller = GetComponent<VRTK_ControllerEvents>();
             _controller.ButtonTwoPressed += OnMenuClicked; // toggle state using the MenuButton
             //_controller.GripClicked += ActivateMatrix;
@@ -182,12 +184,14 @@ namespace VR_Interaction
             
             if (menu == null)
             {
+                scaleControl.menuActivated = true;
                 menu = Instantiate(toolMenuPrefab) as GameObject;
                 menu.GetComponentInChildren<VRToolMenu>().manager = this;
                 menu.transform.position = ((CameraManager.instance.vr_camera.transform.forward * 2) + (CameraManager.instance.vr_camera.transform.up/2));
             }
             else
             {
+                scaleControl.menuActivated = !scaleControl.menuActivated;
                 menu.SetActive(!menu.activeInHierarchy);
                 //Destroy(menu);
             }
