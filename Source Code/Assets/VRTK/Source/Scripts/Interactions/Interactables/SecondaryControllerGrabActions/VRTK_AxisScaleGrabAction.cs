@@ -31,6 +31,11 @@ namespace VRTK.SecondaryControllerGrabActions
         public GameObject additionalObjectToScale;
         public GameObject channel2toScale;
         public GameObject channel2toScale_cloud;
+        public GameObject camera;
+
+        protected GameObject grabPointOne;
+        protected GameObject grabPointTwo;
+
         CloudData data;
         Vector3 newScale;
         Vector3 finalScale;
@@ -38,9 +43,12 @@ namespace VRTK.SecondaryControllerGrabActions
         Vector3 currentScale;
         public bool grabchan = false;
         public bool isLinked = false;
+       // public bool focus = false;
+        
         public float scaleFactor =0.01f;
-        public float sizeFactor = 0.02f;
-        public float brightFactor = 0.02f; 
+        public float sizeFactor = 0.01f;
+        public float brightFactor = 0.01f; 
+        public float scaleThreshold = 0.01f;
         public float adjustedLength;
         public Quaternion relativeRotation;
 
@@ -57,6 +65,12 @@ namespace VRTK.SecondaryControllerGrabActions
         public bool lockZAxis = false;
 
         protected Vector3 initialScale;
+
+        public Vector3 initialGrabOnePos;
+        public Vector3 initialGrabTwoPos;
+        
+        protected Vector3 middlePosition;
+
         protected float initalLength;
         protected float initialScaleFactor;
 
@@ -74,9 +88,24 @@ namespace VRTK.SecondaryControllerGrabActions
             data = CloudUpdater.instance.LoadCurrentStatus();
             currentGrabbdObject = GameObject.Find("CloudPoint").GetComponent<VRTK_InteractableObject>();
             grabbedObject = GameObject.Find("CloudPoint").GetComponent<VRTK_InteractableObject>();
+
+            // focus = false;
+
+            // camera = GameObject.Find("Camera (eye)");
+
+            //grabPointOne = GameObject.Find("[VRTK][AUTOGEN][LeftHand][StraightPointerRenderer_Cursor]");
+            //grabPointTwo = GameObject.Find("[VRTK][AUTOGEN][RightHand][StraightPointerRenderer_Cursor]");
+
+           // middlePosition = (grabPointOne.transform.position + grabPointTwo.transform.position);
+
             initialScale = grabbedObject.transform.parent.localScale;
             initalLength = (primaryGrabbingObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
             initialScaleFactor = (currentGrabbdObject.transform.parent.localScale.x / initalLength );
+
+            // initialGrabOnePos = grabPointOne.transform.position;
+
+            // initialGrabTwoPos = grabPointTwo.transform.position;
+
             relativeRotation = Quaternion.Inverse(additionalObjectToScale.transform.rotation) * grabbedObject.transform.parent.rotation;
             //this.gameObject.GetComponent<VRTK_ChildOfControllerGrabAttach>().moveLock = true;
 
@@ -140,25 +169,34 @@ namespace VRTK.SecondaryControllerGrabActions
                     channel2toScale_cloud = channel2toScale.transform.GetChild(0).gameObject;
                     grabchan = true;
                 }
+
+                // grabPointOne.transform.position = initialGrabOnePos;
+                // grabPointTwo.transform.position = initialGrabTwoPos;
+
                 additionalObjectToScale.transform.SetParent(grabbedObject.transform.parent.transform);
 
+                // if(focus == false)
+                // {
+                //     camera.transform.position -= middlePosition;
+                //     //camera.transform.position.z += 1; 
+                //     focus = true;
+                // }
+
                 grabbedObject.transform.parent.localScale = finalScale;
-
                 grabbedObject.transform.position = box.transform.position;
-
-
                 grabbedObject.transform.parent.rotation = box.transform.rotation * relativeRotation;
+
 
                 currentScale = finalScale;
 
-                CloudUpdater.instance.ChangeCloudScale(finalScale);
+                //CloudUpdater.instance.ChangeCloudScale(finalScale);
 
                 if(channel2toScale)
                 {
                     // CloudUpdater.instance.ChangePointSize(finalScaleX, true);
                     // CloudUpdater.instance.ChangeBrightness(finalScaleX, true);
                     LocalizationSizeScale(true);
-                    LocalizationBrightScale(true);
+                    //LocalizationBrightScale(true);
                     
                     
                     channel2toScale_cloud.transform.position = box.transform.position;
@@ -167,7 +205,7 @@ namespace VRTK.SecondaryControllerGrabActions
                 else
                 {
                     LocalizationSizeScale(false);
-                    LocalizationBrightScale(false);
+                    //LocalizationBrightScale(false);
                     //CloudUpdater.instance.ChangeCloudScale(finalScale);
 
                     //data.globalMetaData.point_brightness;
@@ -199,11 +237,11 @@ namespace VRTK.SecondaryControllerGrabActions
 
         protected virtual void LocalizationSizeScale(bool channel2)
         {
-           if(initalLength > adjustedLength)
+            if((initalLength-scaleThreshold) > adjustedLength)
             {
                 CloudUpdater.instance.ChangePointSize(data.globalMetaData.point_size*(1-sizeFactor), channel2); 
             }
-            if(initalLength < adjustedLength)
+            if((initalLength+scaleThreshold) < adjustedLength)
             {
                 CloudUpdater.instance.ChangePointSize(data.globalMetaData.point_size*(1+sizeFactor), channel2); 
             }
@@ -212,11 +250,11 @@ namespace VRTK.SecondaryControllerGrabActions
         
         protected virtual void LocalizationBrightScale(bool channel2)
         {
-           if(initalLength > adjustedLength)
+           if(initalLength > (adjustedLength + scaleThreshold))
             {
                 CloudUpdater.instance.ChangeBrightness(data.globalMetaData.point_brightness*(1-brightFactor), channel2); 
             }
-            if(initalLength < adjustedLength)
+            if(initalLength < (adjustedLength - scaleThreshold))
             {
                 CloudUpdater.instance.ChangeBrightness(data.globalMetaData.point_brightness*(1+brightFactor), channel2); 
             }
@@ -228,12 +266,12 @@ namespace VRTK.SecondaryControllerGrabActions
             adjustedLength = (primaryGrabbingObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
             Debug.Log("Initial Length: "+ initalLength);
             Debug.Log("Current Length: "+ adjustedLength);
-            if(initalLength > adjustedLength)
+            if( (initalLength-scaleThreshold)  > adjustedLength)
             {
                 newScale =  grabbedObject.transform.parent.localScale *(1-scaleFactor);
                 ApplyScale(newScale, additionalObjectToScale);
             }
-            if(initalLength < adjustedLength)
+            if((initalLength+scaleThreshold) < adjustedLength)
             {
                 newScale = grabbedObject.transform.parent.localScale  *(1+scaleFactor);
                 ApplyScale(newScale, additionalObjectToScale);
