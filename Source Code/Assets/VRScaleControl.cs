@@ -1,8 +1,12 @@
-﻿
+﻿//October 2020
+//Modified by Vincent Casamayou for SuperG
+//Options to control VR Scaling
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VRTK;
+using VRTK.SecondaryControllerGrabActions;
 using Display;
 using Data;
 using IO;
@@ -23,7 +27,10 @@ namespace VR_Interaction
         public GameObject cloudPoint;
         public GameObject box;
 
+        VRTK_AxisScaleGrabAction scalingScript;
+
         public Vector3 boxScaling;
+
 
         public float scaleFactor = 0.01f;
         public float sizeFactor = 0.02f;
@@ -39,6 +46,8 @@ namespace VR_Interaction
             box = GameObject.Find("Box");
 
             boxScaling = box.transform.localScale;
+
+            scalingScript = box.GetComponent<VRTK_AxisScaleGrabAction>();
 
             _controller = GetComponent<VRTK_ControllerEvents>();
             _controller.ButtonOnePressed += OnButtonOnePressed;
@@ -85,6 +94,7 @@ namespace VR_Interaction
             Debug.Log("RESET SCALE");
             if(menuActivated == false || scaleLock== false)
             {
+                cloudPoint.transform.parent.position = scalingScript.initialPos;
                 cloudPoint.transform.parent.localScale = new Vector3(1f,1f,1f); 
                 cloudPoint.transform.localScale = new Vector3(1f,1f,1f); 
                 box.transform.localScale = new Vector3(1f, 0.9985481f, 0.2135878f);

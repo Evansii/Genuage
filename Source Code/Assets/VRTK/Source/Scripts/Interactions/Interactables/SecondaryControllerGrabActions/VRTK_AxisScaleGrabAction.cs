@@ -1,4 +1,7 @@
 ﻿// Axis Scale Grab Action|SecondaryControllerGrabActions|60030
+
+//October 2020
+//Modified by Vincent Casamayou for SuperG
 namespace VRTK.SecondaryControllerGrabActions
 {
     using UnityEngine;
@@ -45,8 +48,8 @@ namespace VRTK.SecondaryControllerGrabActions
         public bool isLinked = false;
        // public bool focus = false;
         
-        public float scaleFactor =0.01f;
-        public float sizeFactor = 0.01f;
+        public float scaleFactor =0.0025f;
+        public float sizeFactor = 0.0025f;
         public float brightFactor = 0.01f; 
         public float scaleThreshold = 0.01f;
         public float adjustedLength;
@@ -68,6 +71,7 @@ namespace VRTK.SecondaryControllerGrabActions
 
         public Vector3 initialGrabOnePos;
         public Vector3 initialGrabTwoPos;
+        public Vector3 initialPos;
         
         protected Vector3 middlePosition;
 
@@ -93,18 +97,16 @@ namespace VRTK.SecondaryControllerGrabActions
 
             // camera = GameObject.Find("Camera (eye)");
 
-            //grabPointOne = GameObject.Find("[VRTK][AUTOGEN][LeftHand][StraightPointerRenderer_Cursor]");
-            //grabPointTwo = GameObject.Find("[VRTK][AUTOGEN][RightHand][StraightPointerRenderer_Cursor]");
+            grabPointOne = GameObject.Find("[VRTK][AUTOGEN][LeftHand][StraightPointerRenderer_Cursor]");
+            grabPointTwo = GameObject.Find("[VRTK][AUTOGEN][RightHand][StraightPointerRenderer_Cursor]");
 
-           // middlePosition = (grabPointOne.transform.position + grabPointTwo.transform.position);
+            middlePosition = (grabPointOne.transform.position + grabPointTwo.transform.position)/2;
 
             initialScale = grabbedObject.transform.parent.localScale;
             initalLength = (primaryGrabbingObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
             initialScaleFactor = (currentGrabbdObject.transform.parent.localScale.x / initalLength );
+            initialPos = grabbedObject.transform.parent.localPosition;
 
-            // initialGrabOnePos = grabPointOne.transform.position;
-
-            // initialGrabTwoPos = grabPointTwo.transform.position;
 
             relativeRotation = Quaternion.Inverse(additionalObjectToScale.transform.rotation) * grabbedObject.transform.parent.rotation;
             //this.gameObject.GetComponent<VRTK_ChildOfControllerGrabAttach>().moveLock = true;
@@ -146,6 +148,23 @@ namespace VRTK.SecondaryControllerGrabActions
             }
         }
 
+         public void ScaleAround(GameObject target, Vector3 pivot, Vector3 newScale)
+        {
+            Vector3 A = target.transform.localPosition;
+            Vector3 B = pivot;
+        
+            Vector3 C = A - B; // diff from object pivot to desired pivot/origin
+        
+            float RS = newScale.x / target.transform.localScale.x; // relative scale factor
+        
+            // calc final position post-scale
+            Vector3 FP = B + C * RS;
+        
+            // finally, actually perform the scale/translation
+            target.transform.localScale = newScale;
+            target.transform.localPosition = FP;
+        }
+
         protected virtual void ApplyScale(Vector3 newScale, GameObject box = null)
         {
             Vector3 existingScale = grabbedObject.transform.parent.localScale;
@@ -181,8 +200,8 @@ namespace VRTK.SecondaryControllerGrabActions
                 //     //camera.transform.position.z += 1; 
                 //     focus = true;
                 // }
-
-                grabbedObject.transform.parent.localScale = finalScale;
+                ScaleAround(grabbedObject.transform.parent.gameObject, middlePosition, finalScale);
+                //grabbedObject.transform.parent.localScale = finalScale;
                 grabbedObject.transform.position = box.transform.position;
                 grabbedObject.transform.parent.rotation = box.transform.rotation * relativeRotation;
 
